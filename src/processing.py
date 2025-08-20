@@ -16,6 +16,8 @@ from datetime import datetime, date, time, timedelta
 import pandas as pd
 from shapely.geometry import box
 import concurrent.futures
+import gc
+from concurrent.futures import as_completed
 from pathlib import Path
 import json
 from functools import lru_cache
@@ -207,8 +209,20 @@ def extract_and_merge_shade_values(dataset_gdf, osmid, binned, config):
                 future = executor.submit(get_dataset_shaderesult, subset, osmid, binned, config)
                 futures.append(future)
 
-        for future in futures:
-            results.append(future.result())
+        # Use as_completed to process results as they finish, and manage memory
+        for idx, future in enumerate(as_completed(futures)):
+            result = future.result()
+            if result is not None:
+                results.append(result)
+                del result
+            if (idx + 1) % 25 == 0:
+                gc.collect()
+
+    # Write interim result file to disk if results are not empty
+    if results:
+        interim_path = Path(config["output_dir"]) / f"temp_extracted_results_{osmid}.parquet"
+        pd.concat(results, axis=0).to_parquet(interim_path)
+        print(f"Interim extracted shade results written to {interim_path}")
 
     return pd.concat(results, axis=0)
 
