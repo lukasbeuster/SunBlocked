@@ -281,7 +281,7 @@ def process_shade(config):
     dataset = load_dataset_flexibly(cfg)
     timestamp_col = cfg['columns']['timestamp']
     dataset[timestamp_col] = pd.to_datetime(dataset[timestamp_col], errors='coerce')
-    # Important: keep these as naive LOCAL timestamps so they match the LST times in your shade filenames.
+    # Important: keep these as naive LOCAL timestamps so they match the Local Solar Time (LST) times in your shade filenames.
     
     n_invalid = dataset[timestamp_col].isna().sum()
     print(f"{n_invalid} rows failed to parse timestamps and became NaT")
