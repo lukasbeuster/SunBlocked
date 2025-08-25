@@ -132,13 +132,15 @@ def run_shade_processing(config, osmid, year, year_data):
 
     dataset_gdf, tile_grouped_days, original_dataset = process_dataset(year_data, year, osmid, config)
 
+    print(f"Processed dataset: Tiles and timestamps processed")
+
     if tile_grouped_days is None:
         # Create an empty GeoDataFrame with a specified CRS
         empty_gdf = gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
         print(f"User Warning: The dataset result for year {year} is empty. Make sure dataset geometry overlaps with processed rasters in step 4")
         return empty_gdf
 
-    run_shade_simulations(tile_grouped_days, dataset_gdf, osmid, year, config)
+    # run_shade_simulations(tile_grouped_days, dataset_gdf, osmid, year, config)
 
     dataset_with_shade = extract_and_merge_shade_values(dataset_gdf, osmid, binned, config)
 
