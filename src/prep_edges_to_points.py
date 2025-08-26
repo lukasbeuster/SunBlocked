@@ -54,12 +54,12 @@ def main():
     back_bay_poly = "../data/raw_data/bos/back_bay.json"            # Optional AOI
     hour_csvs = [
         "../data/clean_data/strava/data_to_share/all_edges_hourly_2024-04-01-2024-04-30_ped_boston_filtered/53f3ef7e32738022bd45a2ed224bcbcf8cb63f07dc3d5bca7e9221dfe7fe4451-1738340934480.csv",
-        # "PATH/TO/hours_june.csv",
-        # "PATH/TO/hours_october.csv",
-        # "PATH/TO/hours_december.csv",
+        "../data/clean_data/strava/data_to_share/all_edges_hourly_2024-06-01-2024-06-30_ped_boston_filtered/2496bcdb5fd9d0ae571ecbe8bc16ecbbad2ebc9cab61ae94449698ef39e41cf4-1738340261837.csv",
+        "../data/clean_data/strava/data_to_share/all_edges_hourly_2024-10-01-2024-10-31_ped_boston_filtered/5ea6147519dc3a820312867430fec9067a1eb42846d1ac03f5446f461b85c5b0-1738340998655.csv",
+        "../data/clean_data/strava/data_to_share/all_edges_hourly_2024-12-01-2024-12-31_ped_boston_filtered/66feca840e0c280c5bd400436507918bbd27a19acd14e99d5bc00d0b4b144e9e-1738340241545.csv",
     ]
     spacing_m = 10
-    prepared_out = Path("../data/clean_data/strava/back_bay_points_hours.parquet")
+    prepared_out = Path("../data/clean_data/strava/back_bay_points_hours_all_months.parquet")
 
     # 1) Load edges, clip to Back Bay
     edges = gpd.read_file(edges_path)
