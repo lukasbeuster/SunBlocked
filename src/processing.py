@@ -25,13 +25,39 @@ from functools import lru_cache
 
 importlib.reload(shade)
 
+import warnings
+# Suppress pandas FutureWarning about DataFrame concatenation with empty or all-NA entries
+warnings.filterwarnings("ignore", category=FutureWarning, message=".*DataFrame concatenation with empty or all-NA entries.*")
+
+
+
+# Wrapper function for multiprocessing (cannot use lambda with ProcessPoolExecutor)
+def _process_dataset_subset(args):
+    """Wrapper function to process a dataset subset for multiprocessing."""
+    subset, osmid, binned, config = args
+    return get_dataset_shaderesult(subset, osmid, binned, config)
+
+
 # Set exception handling
 gdal.UseExceptions()
+
+# Log which years were missing in config to avoid spamming the console
+_MISSING_YEAR_KEYS_LOGGED = set()
 
 # --- Daylight guards ---------------------------------------------------------
 @lru_cache(maxsize=16384)
 def _raster_lonlat_cached(raster_path: str):
     return _raster_lonlat(raster_path)
+
+# --- Cached helper to find building mask for a tile ---
+@lru_cache(maxsize=16384)
+def _find_building_mask(output_dir: str, osmid: str, tile_id: str):
+    """Return the first building mask path for this tile, or None if not found."""
+    mask_dir = str(Path(output_dir) / f"step2_solar_data/{osmid}")
+    matches = [
+        b for b in glob.glob(os.path.join(mask_dir, '*mask.tif')) if f"{tile_id}_" in b
+    ]
+    return matches[0] if matches else None
 
 def _raster_lonlat(raster_path):
     """Return (lon, lat) of the lower-left corner of a raster in WGS84."""
@@ -128,27 +154,55 @@ def run_shade_processing(config, osmid, year, year_data):
     Returns:
         GeoDataFrame: Final processed dataset with averaged shade metrics.
     """
+    # TODO: there's too much in this function - and not enough failsafes in case one of the very long actions fails. This needs to be split. 
     binned = int(config['simulation']['bin_size']) > 0
 
     dataset_gdf, tile_grouped_days, original_dataset = process_dataset(year_data, year, osmid, config)
 
-    print(f"Processed dataset: Tiles and timestamps processed")
+    # TODO: Write dataset_gdf to disk to have a save with binned_date and tile_no - combine year files at the end.
+    output_dir = Path(config['output_dir'])
+    final_output_dir = output_dir / f"step6_final_result/{osmid}"
+    final_output_dir.mkdir(parents=True, exist_ok=True)
+    bin_output_path = final_output_dir / f"binned_dataset_{year}.geojson" 
+    dataset_gdf.to_file(bin_output_path, driver="GeoJSON")
+    print(f"\n✅ Step 1 complete! Tiles and binned timestamps for {year} saved to: {bin_output_path}")
 
     if tile_grouped_days is None:
         # Create an empty GeoDataFrame with a specified CRS
         empty_gdf = gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
         print(f"User Warning: The dataset result for year {year} is empty. Make sure dataset geometry overlaps with processed rasters in step 4")
         return empty_gdf
+    # TODO: revert back to original to re-activate the shade simulations and shade data extraction.
+    return dataset_gdf
 
+    # TODO: split this so that this function is dependent on inputs activated separately. 
     # run_shade_simulations(tile_grouped_days, dataset_gdf, osmid, year, config)
 
     dataset_with_shade = extract_and_merge_shade_values(dataset_gdf, osmid, binned, config)
 
-    dataset_with_shade = dataset_with_shade.set_crs("EPSG:4326", allow_override=True)
+    # Handle both DataFrame and GeoDataFrame
+    if hasattr(dataset_with_shade, 'set_crs'):
+        dataset_with_shade = dataset_with_shade.set_crs("EPSG:4326", allow_override=True)
+    else:
+        # Convert DataFrame to GeoDataFrame if it's not already
+        import geopandas as gpd
+        if 'geometry' in dataset_with_shade.columns:
+            dataset_with_shade = gpd.GeoDataFrame(dataset_with_shade, geometry='geometry', crs="EPSG:4326")
+        else:
+            print("Warning: No geometry column found, cannot set CRS")
 
     dataset_final = aggregate_results(dataset_with_shade, original_dataset, config)
 
-    dataset_final = dataset_final.set_crs("EPSG:4326", allow_override=True)
+    # Handle both DataFrame and GeoDataFrame
+    if hasattr(dataset_final, 'set_crs'):
+        dataset_final = dataset_final.set_crs("EPSG:4326", allow_override=True)
+    else:
+        # Convert DataFrame to GeoDataFrame if it's not already
+        import geopandas as gpd
+        if 'geometry' in dataset_final.columns:
+            dataset_final = gpd.GeoDataFrame(dataset_final, geometry='geometry', crs="EPSG:4326")
+        else:
+            print("Warning: No geometry column found, cannot set CRS")
 
     return dataset_final
 
@@ -171,6 +225,8 @@ def run_shade_simulations(tile_grouped_days, dataset_gdf, osmid, year, config):
     winter_params = config['seasons']['winter']
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=config['max_workers']) as executor:
+        total_subsets = sum(1 for _ in _subsets())  # Count total subsets for progress
+        print("Processing {} data subsets with {} workers...".format(total_subsets, config['max_workers']))
         for tile_id, dates in tile_grouped_days.items():
             tile_dataset = dataset_gdf[dataset_gdf['tile_number'] == tile_id]
             for sim_date, timestamps in dates.items():
@@ -201,32 +257,82 @@ def extract_and_merge_shade_values(dataset_gdf, osmid, binned, config):
     Returns:
         DataFrame: Concatenated results of all processed subsets with shade metrics.
     """
-    results = []
-    with concurrent.futures.ProcessPoolExecutor(max_workers=config['max_workers']) as executor:
-        futures = []
-        for tile_no in dataset_gdf["tile_number"].unique():
-            tile_data = dataset_gdf[dataset_gdf["tile_number"] == tile_no]
-            for timestamp in tile_data["rounded_timestamp"].unique():
-                subset = tile_data[tile_data["rounded_timestamp"] == timestamp]
-                future = executor.submit(get_dataset_shaderesult, subset, osmid, binned, config)
-                futures.append(future)
+    # Stream results instead of holding thousands of Future objects in memory.
+    # Build an iterator of (subset, osmid, binned, config) inputs.
+    def _subsets():
+        for tile_no, tile_data in dataset_gdf.groupby("tile_number"):
+            for timestamp, subset in tile_data.groupby("rounded_timestamp"):
+                # Important: copy the slice to detach from parent and reduce view memory
+                yield subset.copy()
 
-        # Use as_completed to process results as they finish, and manage memory
-        for idx, future in enumerate(as_completed(futures)):
-            result = future.result()
-            if result is not None:
+    results = []
+    temp_parts = []
+    part_idx = 0
+    write_every = int(config.get('interim_write_every', 50))  # configurable; default 50 chunks
+
+    with concurrent.futures.ProcessPoolExecutor(max_workers=config['max_workers']) as executor:
+        total_subsets = sum(1 for _ in _subsets())  # Count total subsets for progress
+        print("Processing {} data subsets with {} workers...".format(total_subsets, config['max_workers']))
+        # map will backpressure according to max_workers, keeping memory bounded
+        for idx, result in enumerate(executor.map(_process_dataset_subset, ((ds, osmid, binned, config) for ds in _subsets()))):
+            if idx > 0 and (idx + 1) % 100 == 0:
+                print(f"Processed {idx + 1} subsets...")
+            if result is not None and not result.empty:
                 results.append(result)
-                del result
-            if (idx + 1) % 25 == 0:
+            # Periodically flush to disk to keep RAM usage low
+            if (idx + 1) % write_every == 0 and results:
+                interim_dir = Path(config["output_dir"]) / "_temp_extracted_parts"
+                interim_dir.mkdir(parents=True, exist_ok=True)
+                part_path = interim_dir / f"part_{osmid}_{part_idx}.parquet"
+                if results:
+                    pd.concat(results, axis=0).to_parquet(part_path)
+                temp_parts.append(part_path)
+                results.clear()
+                part_idx += 1
                 gc.collect()
 
-    # Write interim result file to disk if results are not empty
+    # Flush any remaining in‑memory chunks
     if results:
-        interim_path = Path(config["output_dir"]) / f"temp_extracted_results_{osmid}.parquet"
-        pd.concat(results, axis=0).to_parquet(interim_path)
-        print(f"Interim extracted shade results written to {interim_path}")
+        interim_dir = Path(config["output_dir"]) / "_temp_extracted_parts"
+        interim_dir.mkdir(parents=True, exist_ok=True)
+        part_path = interim_dir / f"part_{osmid}_{part_idx}.parquet"
+        if results:
+            pd.concat(results, axis=0).to_parquet(part_path)
+        temp_parts.append(part_path)
+        results.clear()
+        gc.collect()
 
-    return pd.concat(results, axis=0)
+    # Combine temp parts (if any) into a single DataFrame and also write a single interim file
+    if temp_parts:
+        # Filter out any empty parquet files and concatenate
+        parquet_dfs = []
+        for p in temp_parts:
+            try:
+                df = pd.read_parquet(p)
+                if not df.empty:
+                    parquet_dfs.append(df)
+            except Exception as e:
+                print(f"Warning: Could not read parquet file {p}: {e}")
+        
+        if parquet_dfs:
+            combined = pd.concat(parquet_dfs, axis=0, ignore_index=False)
+        else:
+            combined = pd.DataFrame()
+        interim_path = Path(config["output_dir"]) / f"temp_extracted_results_{osmid}.parquet"
+        combined.to_parquet(interim_path)
+        # Also persist a compact mapping (unique_id → tile_number, rounded_timestamp, binned_date) for downstream edge extraction
+        uid = config['columns']['unique_id']
+        map_cols = [c for c in ['tile_number', 'rounded_timestamp', 'binned_date', uid] if c in combined.columns]
+        if len(map_cols) == 4:
+            mapping = combined[map_cols].drop_duplicates()
+            mapping_path = Path(config["output_dir"]) / f"tile_time_mapping_{osmid}.parquet"
+            mapping.to_parquet(mapping_path)
+            print(f"Wrote mapping for edge extraction: {mapping_path} ({len(mapping)} rows)")
+        print(f"Interim extracted shade results written to {interim_path} ({len(combined)} rows)")
+        return combined
+    else:
+        # No data produced; return an empty DataFrame with the original columns for downstream safety
+        return pd.DataFrame(index=dataset_gdf.index)
 
 def aggregate_results(dataset_with_shade, original_dataset, config):
     """
@@ -274,11 +380,21 @@ def aggregate_results(dataset_with_shade, original_dataset, config):
     dataset_aggregated = dataset_cleaned.groupby(config['columns']['unique_id'], as_index=False)[shade_columns].mean()
 
     # Select and preserve intermediate metadata columns from dataset_with_shade
+    # Ensure these exist; if not, create with NaN to avoid KeyErrors but keep schema consistent
     metadata_cols = ["tile_number", "rounded_timestamp", "binned_date", "season"]
-    metadata = dataset_with_shade[[config['columns']['unique_id']] + metadata_cols].drop_duplicates()
+    for mc in metadata_cols:
+        if mc not in dataset_with_shade.columns:
+            dataset_with_shade[mc] = np.nan
 
-    # Merge shade values and metadata into original dataset
+    # Keep a single row per unique_id × (tile_number, rounded_timestamp, binned_date)
+    metadata = (
+        dataset_with_shade[[config['columns']['unique_id']] + metadata_cols]
+        .drop_duplicates()
+    )
+
+    # Merge shade values into original dataset (inner on unique_id)
     merged = original_dataset.merge(dataset_aggregated, on=config['columns']['unique_id'], how="inner")
+    # Attach metadata with a LEFT join to avoid losing original rows
     merged = merged.merge(metadata, on=config['columns']['unique_id'], how="left")
     return gpd.GeoDataFrame(merged, geometry='geometry')
 
@@ -661,22 +777,38 @@ def get_dataset_shaderesult(dataset, osmid, binned, config):
 
     # --- Daylight guard at extraction time ------------------------------------
     try:
-        # locate building mask to derive lon/lat for this tile
-        building_mask_file = [
-            b for b in glob.glob(os.path.join(str(Path(config['output_dir']) / f"step2_solar_data/{osmid}"), '*mask.tif')) if f"{tile_id}_" in b
-        ]
-        if building_mask_file:
-            building_mask_path = building_mask_file[0]
+        # Locate building mask once (cached) to derive lon/lat for this tile
+        building_mask_path = _find_building_mask(config['output_dir'], osmid, tile_id)
+        if building_mask_path:
             lon, lat = _raster_lonlat_cached(building_mask_path)
 
-            # derive UTC and DST offset
-            year_key = str(rounded_ts.year)
-            year_cfg = config['year_configs'][year_key]
-            dst_start = datetime.fromisoformat(year_cfg['dst_start']).date()
-            dst_end = datetime.fromisoformat(year_cfg['dst_end']).date()
-            is_dst = 1 if (dst_start <= rounded_ts.date() < dst_end) else 0
-            # prefer explicit UTC from config seasons; fallback to +1
-            utc = config.get('seasons', {}).get('summer', {}).get('utc', 1)
+            # Derive UTC and DST offset with graceful fallbacks
+            y_int = rounded_ts.year
+            year_key = str(y_int)  # <-- add this
+            yc = config.get('year_configs', {})
+            year_cfg = yc.get(y_int) or yc.get(str(y_int))
+            if year_cfg is None:
+                # Throttle the warning to one per missing year
+                if year_key not in _MISSING_YEAR_KEYS_LOGGED:
+                    print(f"Warning: year '{year_key}' not found in config['year_configs']; assuming no DST for daylight check.")
+                    _MISSING_YEAR_KEYS_LOGGED.add(year_key)
+                is_dst = 0
+            else:
+                try:
+                    dst_start = datetime.fromisoformat(year_cfg['dst_start']).date()
+                    dst_end = datetime.fromisoformat(year_cfg['dst_end']).date()
+                    is_dst = 1 if (dst_start <= rounded_ts.date() < dst_end) else 0
+                except Exception as _e:
+                    # Malformed dates in config; default to no DST
+                    print(f"Warning: malformed DST bounds for year {year_key} ({_e}); assuming no DST.")
+                    is_dst = 0
+
+            # Prefer explicit UTC from seasons; fallback to +1
+            utc = (
+                config.get('seasons', {}).get('summer', {}).get('utc')
+                if isinstance(config.get('seasons', {}).get('summer', {}).get('utc'), (int, float))
+                else 1
+            )
 
             if not _is_daylight(rounded_ts, lon, lat, utc, is_dst):
                 # Night time: skip heavy I/O and return NaNs quickly
@@ -684,7 +816,8 @@ def get_dataset_shaderesult(dataset, osmid, binned, config):
         else:
             print("Warning: no building mask found for daylight check; proceeding without it.")
     except Exception as e:
-        print(f"Daylight check failed ({e}); proceeding.")
+        # Don't spam the console with cryptic object prints; show a concise reason
+        print(f"Daylight check skipped due to error: {e}")
 
     # Start raster extraction
     base_path = Path(config['output_dir']) / f"step5_shade_results/{osmid}"
@@ -721,9 +854,9 @@ def get_dataset_shaderesult(dataset, osmid, binned, config):
         # timestamp falls outside simulated daylight window
         return _empty_result_df()
 
-    if not building_mask_file:
+    building_mask_path = _find_building_mask(config['output_dir'], osmid, tile_id)
+    if not building_mask_path:
         raise Exception("Couldn't find building mask file to extract shade values")
-    building_mask_path = building_mask_file[0]
 
     result_df = pd.DataFrame(index=dataset.index)
     crop_pixels = config.get('raster_crop_pixels', 50)
@@ -778,7 +911,8 @@ def extract_values_from_raster(raster_path, building_mask_path, dataset, buffer,
     values = np.full(len(dataset), np.nan)
 
     with rasterio.open(raster_path) as src, rasterio.open(building_mask_path) as bsrc:
-        dataset = dataset.to_crs(src.crs)
+        if getattr(dataset, 'crs', None) != src.crs:
+            dataset = dataset.to_crs(src.crs)
         dataset = dataset.reset_index(drop=True)
 
         raster_nodata = src.nodata if src.nodata is not None else np.nan
@@ -842,100 +976,6 @@ def extract_values_from_raster(raster_path, building_mask_path, dataset, buffer,
 
     return values
 
-# def extract_values_from_raster(raster_path, building_mask_path, dataset, buffer, crop_pixels):
-#     """
-#     Extracts shade values, correctly accounting for a cropped shade raster
-#     by using the building mask as a reference grid and applying a pixel offset.
-#     """
-#     if not os.path.exists(raster_path):
-#         print(f"Warning: Raster file {raster_path} not found.")
-#         return np.full(len(dataset), np.nan)
-
-#     with rasterio.open(raster_path) as src, rasterio.open(building_mask_path) as bsrc:
-#         raster_data = src.read(1, masked=False)
-#         building_mask = bsrc.read(1, masked=False)
-
-#         raster_nodata = src.nodata if src.nodata is not None else np.nan
-
-#         # We only need the transform from the larger, reference raster (building mask)
-#         building_transform = bsrc.transform
-
-#         # Reproject points to match the reference raster CRS
-#         dataset = dataset.to_crs(bsrc.crs)
-#         dataset = dataset.reset_index(drop=True)
-
-#         values = np.full(len(dataset), np.nan)
-
-#         # Buffer in pixels is calculated from the reference raster's resolution
-#         res_x, _ = bsrc.res
-#         buffer_pixels = int(buffer / res_x) if buffer > 0 else 0
-
-#         for idx, row in dataset.iterrows():
-#             x, y = row.geometry.x, row.geometry.y
-
-#             try:
-#                 # --- Step 1: Get the pixel location ONLY from the un-cropped building mask ---
-#                 building_row, building_col = rowcol(building_transform, x, y)
-#             except Exception as e:
-#                 print(f"⚠️ Error converting coordinates: {e}")
-#                 continue
-
-#             # Check bounds for the reference building mask
-#             if not (0 <= building_row < building_mask.shape[0] and 0 <= building_col < building_mask.shape[1]):
-#                 print(f"❌ Point is outside the building mask boundary")
-#                 continue
-
-#             # --- Step 2: Calculate the corresponding location in the cropped raster ---
-#             #    This is the key step: we apply the offset.
-#             raster_row = building_row - crop_pixels
-#             raster_col = building_col - crop_pixels
-
-#             # --- Step 3: Check if this new, calculated location is valid in the cropped raster ---
-#             if not (0 <= raster_row < raster_data.shape[0] and 0 <= raster_col < raster_data.shape[1]):
-#                 # This means the point was in the margin that got cropped out.
-#                 print(f"❌ Point falls within the cropped margin (a building footprint), no shade data available.")
-#                 continue
-
-#             if buffer == 0:
-#                 if building_mask[building_row, building_col] == 1:
-#                     values[idx] = np.nan
-#                 else:
-#                     val = raster_data[raster_row, raster_col]
-#                     values[idx] = np.nan if val == raster_nodata else val
-#             else:
-#                 # Buffer window for the building mask (using its original indices)
-#                 b_row_start = max(building_row - buffer_pixels, 0)
-#                 b_row_end = min(building_row + buffer_pixels + 1, building_mask.shape[0])
-#                 b_col_start = max(building_col - buffer_pixels, 0)
-#                 b_col_end = min(building_col + buffer_pixels + 1, building_mask.shape[1])
-#                 building_window = building_mask[b_row_start:b_row_end, b_col_start:b_col_end]
-
-#                 # Buffer window for the shade raster (using its OFFSET indices)
-#                 r_row_start = max(raster_row - buffer_pixels, 0)
-#                 r_row_end = min(raster_row + buffer_pixels + 1, raster_data.shape[0])
-#                 r_col_start = max(raster_col - buffer_pixels, 0)
-#                 r_col_end = min(raster_col + buffer_pixels + 1, raster_data.shape[1])
-#                 raster_window = raster_data[r_row_start:r_row_end, r_col_start:r_col_end]
-
-#                 # The windows are now geographically aligned but might have slightly different
-#                 # shapes if a buffer goes over an edge. We trim to the smallest intersection.
-#                 min_rows = min(raster_window.shape[0], building_window.shape[0])
-#                 min_cols = min(raster_window.shape[1], building_window.shape[1])
-
-#                 raster_window_synced = raster_window[:min_rows, :min_cols]
-#                 building_window_synced = building_window[:min_rows, :min_cols]
-
-#                 filtered = np.where(
-#                     (building_window_synced == 1) | (raster_window_synced == raster_nodata),
-#                     np.nan,
-#                     raster_window_synced
-#                 )
-
-#                 valid_vals = filtered[~np.isnan(filtered)]
-#                 values[idx] = np.nanmean(valid_vals) if valid_vals.size > 0 else np.nan
-
-#     return values
-
 def hours_before_shadow_fr(dataset, base_path, building_mask_path, shade_type, rounded_timestamp, tile_number, osmid, hours_before, buffer, crop_pixels):
     """
     Computes the average shadow fraction for each point in the dataset by aggregating shadow data
@@ -978,7 +1018,7 @@ def hours_before_shadow_fr(dataset, base_path, building_mask_path, shade_type, r
         return np.full(len(dataset), np.nan)
 
     if start_hour < first_shade_time:
-        print("Start_hour is earlier than the first available shade file — assigning NaNs.")
+        # Suppress repetitive messages - will be logged at the end
         return np.full(len(dataset), np.nan)
 
     # If the exact `start_hour` shadow file doesn't exist, find the closest valid one
@@ -1032,8 +1072,8 @@ def get_shade_files_in_range(base_path, shade_type, tile_number, osmid, start_ho
         print(f"Directory does not exist: {directory}")
         return []
 
-    # Regex pattern to extract timestamp from filenames
-    pattern = re.compile(rf"{osmid}_p_{tile_number}_Shadow_(\d{{8}}_\d{{4}})_LST\.tif")
+    # Support both `<osmid>_p_<tile>` and filenames where `tile_id` already includes the `p_` prefix
+    pattern = re.compile(rf"(?:{osmid}_)?p_{tile_number}_Shadow_(\d{{8}}_\d{{4}})_LST\.tif")
 
     # List all files in directory
     all_files = os.listdir(directory)
@@ -1074,8 +1114,7 @@ def get_closest_shade_file(base_path, shade_type, tile_number, osmid, start_hour
         print(f"Directory does not exist: {directory}")
         return None
 
-    # Regex pattern to extract timestamp from filenames
-    pattern = re.compile(rf"{osmid}_p_{tile_number}_Shadow_(\d{{8}}_\d{{4}})_LST\.tif")
+    pattern = re.compile(rf"(?:{osmid}_)?p_{tile_number}_Shadow_(\d{{8}}_\d{{4}})_LST\.tif")
 
     # List all files in directory
     all_files = os.listdir(directory)
@@ -1253,6 +1292,8 @@ def process_dataset(dataset, year, osmid, config):
     tiles_gdf = gpd.GeoDataFrame(raster_tiles, crs=raster_crs)
 
     dataset_copy = dataset.copy()
+    # TODO: Check if necessary. Dataset loaded with new load_dataset_flexibly function should already be gdf. Year subset shouldn't affect dataset type.
+    # Might be adding unnecessary overhead
 
     # If geometry exists and is Point, keep it; otherwise build from lon/lat
     if "geometry" in dataset_copy.columns and hasattr(dataset_copy["geometry"], "geom_type"):
@@ -1275,6 +1316,7 @@ def process_dataset(dataset, year, osmid, config):
     # Drop unnecessary columns from spatial join
     df_gdf.drop(columns=["index_right"], inplace=True, errors="ignore")
 
+    # TODO: is this just a precaution? This shouldn't happen, right?
     df_gdf = df_gdf.dropna(subset=["tile_number"])
 
     timestamp_column = config['columns']['timestamp']
@@ -1288,11 +1330,14 @@ def process_dataset(dataset, year, osmid, config):
     solstice_day = datetime.fromisoformat(config['year_configs'][year]['solstice_day'])
     df_gdf["diff_solstice_day"] = df_gdf["rounded_timestamp"].dt.date - solstice_day.date()
 
+    print(f'Preprocessing done for {year}, binning data next')
+
     tile_grouped_days, modified_dataset = bin_data(df_gdf, config, solstice_day)
 
     if tile_grouped_days is None:
         return (None, None, None)
 
+    # TODO: Check if this actually works. It looks like for the strava analysis, winter transmissivity values were used. 
     modified_dataset["season"] = modified_dataset["binned_date"].apply(
         lambda date: assign_summer_winter(date, datetime.fromisoformat(config['year_configs'][year]['dst_start']).date(), datetime.fromisoformat(config['year_configs'][year]['dst_end']).date()
         )
