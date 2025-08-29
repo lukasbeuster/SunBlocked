@@ -299,9 +299,11 @@ def process_shade(config):
         if year_data.empty:
             click.secho(f"  No data found for year {year}, skipping.", fg='yellow')
             continue
-
+        # TODO: Check, does this for some reason add a empty result to all_year_result when more years are present in config?
+        # TODO: Add warning to add DST for regions. Some regions also don't have this at all - how to deal with that?
         # Call the engine function for this year's data
         single_year_result = run_shade_processing(cfg, osmid, year, year_data)
+        # TODO: Dump to disk to get out of memory - concat after the fact. 
         all_year_results.append(single_year_result)
 
     # Combine and save the final result
@@ -312,7 +314,7 @@ def process_shade(config):
         # Add a placeholder for your final output path in config if needed
         final_output_dir = output_dir / f"step6_final_result/{osmid}"
         final_output_dir.mkdir(parents=True, exist_ok=True)
-        final_output_path = final_output_dir / "shaded_dataset.geojson"
+        final_output_path = final_output_dir / "shaded_dataset_testing.geojson"
 
         final_dataset.to_file(final_output_path, driver="GeoJSON")
         click.secho(f"\n✅ Pipeline complete! Final output saved to: {final_output_path}", fg='green')
