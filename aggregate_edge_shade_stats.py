@@ -203,14 +203,19 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
         arr_frac, transform_frac, nodata_frac, raster_crs_frac = mosaic_rasters(base, "combined_shade", tile_list, binned_date, time_str, osmid, base_name="shadow_fraction_on")
 
         if arr is None:
-            print(f"[miss] No combined_shade for edge={edge_uid} date={binned_date} time={time_str} tiles={tile_list}")
+            print(f"[night] No combined_shade for edge={edge_uid} date={binned_date} time={time_str} tiles={tile_list} → assuming nighttime (shade=1)")
             pairs_missed += 1
+            # CHANGE: Instead of skipping, assume nighttime (shaded = 1)
+            for buffer in buffers:
+                suffix = f"_buffer{int(buffer)}" if buffer else ""
+                row[f"combined_shade{suffix}"] = 1.0  # Assume nighttime = fully shaded
+                if arr_frac is None:
+                    row[f"combined_shadow_fraction{suffix}"] = 1.0  # Also assume full shadow fraction
         else:
             pairs_found += 1
-
-        for buffer in buffers:
-            suffix = f"_buffer{int(buffer)}" if buffer else ""
-            if arr is not None:
+            # Process normally with existing raster data
+            for buffer in buffers:
+                suffix = f"_buffer{int(buffer)}" if buffer else ""
                 eg = edge_geom
                 if raster_crs is not None:
                     try:
@@ -219,15 +224,16 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
                     except Exception as ex:
                         print(f"[warn] CRS reprojection failed for edge {edge_uid}: {ex}")
                 row[f"combined_shade{suffix}"] = zonal_from_array(eg, arr, transform, nodata_val, buffer)
-            if arr_frac is not None:
-                egf = edge_geom
-                if raster_crs_frac is not None:
-                    try:
-                        if egf.crs is None or egf.crs != raster_crs_frac:
-                            egf = egf.to_crs(raster_crs_frac)
-                    except Exception as ex:
-                        print(f"[warn] CRS reprojection failed (frac) for edge {edge_uid}: {ex}")
-                row[f"combined_shadow_fraction{suffix}"] = zonal_from_array(egf, arr_frac, transform_frac, nodata_frac, buffer)
+                
+                if arr_frac is not None:
+                    egf = edge_geom
+                    if raster_crs_frac is not None:
+                        try:
+                            if egf.crs is None or egf.crs != raster_crs_frac:
+                                egf = egf.to_crs(raster_crs_frac)
+                        except Exception as ex:
+                            print(f"[warn] CRS reprojection failed (frac) for edge {edge_uid}: {ex}")
+                    row[f"combined_shadow_fraction{suffix}"] = zonal_from_array(egf, arr_frac, transform_frac, nodata_frac, buffer)
 
         results.append(row)
 
@@ -242,7 +248,7 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
     print("\n===== RUN SUMMARY =====")
     print(f"Pairs total:  {pairs_total}")
     print(f"Pairs found:  {pairs_found}")
-    print(f"Pairs missed: {pairs_missed}")
+    print(f"Pairs missed: {pairs_missed} (treated as nighttime)")
     for col in value_cols:
         ser = merged[col].dropna()
         if len(ser) == 0:
@@ -276,7 +282,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", required=True)
     parser.add_argument("--config", default="config.yaml")
     parser.add_argument("--osmid", required=True)
-    parser.add_argument("--buffers", nargs="+", type=float, default=[0])
+    parser.add_argument("--buffers", nargs="+", type=float, default=[0])  # CHANGE: Default to only buffer=0
     parser.add_argument("--include_building", action="store_true")
     parser.add_argument("--sample_n", type=int, default=0, help="Process only N (edge_uid, time) pairs for a quick test. 0=all.")
     parser.add_argument("--sample_seed", type=int, default=42, help="Random seed for sampling.")
@@ -297,20 +303,30 @@ if __name__ == "__main__":
     )
 
 
+# UPDATED EXAMPLE COMMANDS:
+# Quick sample run (no buffers, fast):
 # python aggregate_edge_shade_stats.py \
 #   --points results/output/step6_final_result/cbdb17d4/binned_dataset_2024.geojson \
 #   --edges  data/clean_data/strava/back_bay_edges_aoi.geojson \
 #   --output results/output/step6_final_result/cbdb17d4/edge_stats_sample.geojson \
 #   --config config.yaml \
 #   --osmid cbdb17d4 \
-#   --buffers 0 10 \
 #   --sample
 
-# nohup python src/aggregate_edge_shade_stats.py \
+# Full run (no buffers, for first version to partners):
+# nohup python aggregate_edge_shade_stats.py \
 #   --points results/output/step6_final_result/cbdb17d4/binned_dataset_2024.geojson \
 #   --edges  data/clean_data/strava/back_bay_edges_aoi.geojson \
-#   --output results/output/step6_final_result/cbdb17d4/edge_stats_full.geojson \
+#   --output results/output/step6_final_result/cbdb17d4/edge_stats_v1_no_buffers.geojson \
 #   --config config.yaml \
 #   --osmid cbdb17d4 \
-#   --buffers 0 10 \
-#   > logs/aggregate_full.log 2>&1 &
+#   > logs/aggregate_v1_no_buffers.log 2>&1 &
+
+# If you need buffers later (slower):
+# python aggregate_edge_shade_stats.py \
+#   --points results/output/step6_final_result/cbdb17d4/binned_dataset_2024.geojson \
+#   --edges  data/clean_data/strava/back_bay_edges_aoi.geojson \
+#   --output results/output/step6_final_result/cbdb17d4/edge_stats_with_buffers.geojson \
+#   --config config.yaml \
+#   --osmid cbdb17d4 \
+#   --buffers 0 5 10
