@@ -31,27 +31,6 @@ def _list_available_times(tile_folder: Path, osmid: str, tile_id: str, date_str:
                 break
     return sorted(set(times))
 
-def _print_folder_snapshot(base: Path, shade_type: str, tile_id: str, date_str: str, osmid: str, base_name: str):
-    folder_num = tile_id.split('_')[-1] if '_' in tile_id else tile_id
-    folders = [base / shade_type / folder_num, base / shade_type / tile_id]
-    print(f"[debug] Shade base: {base}")
-    print(f"[debug] Shade type: {shade_type}")
-    for f in folders:
-        print(f"[debug] Checking folder: {f} exists={f.exists()}")
-        if f.exists():
-            try:
-                entries = list(f.iterdir())
-                print(f"[debug]  files/dirs: {len(entries)} (showing up to 5)")
-                for e in entries[:5]:
-                    print(f"         - {e.name}")
-                times = _list_available_times(f, osmid, tile_id, date_str, base_name)
-                if times:
-                    print(f"[debug]  available times for date {date_str}: {times[:10]}{' ...' if len(times)>10 else ''}")
-                else:
-                    print(f"[debug]  no files matching pattern for date {date_str}")
-            except Exception as ex:
-                print(f"[warn] could not list folder {f}: {ex}")
-
 def _candidate_filenames(osmid, tile_id, date_str, time_str, base_name="Shadow"):
     # Match final_corrected_extraction pattern: ..._{date}_{time}_LST.tif (and without _LST)
     return [
@@ -72,33 +51,97 @@ def _find_single_raster(base, shade_type, tile_id, date_str, time_str, osmid, ba
             p = tile_folder / name
             if p.exists():
                 return p
-    # Not found – print a concise troubleshooting snapshot for the first folder
-    # (avoid spamming inside tight loops by keeping it short)
-    print(f"[miss:file] {shade_type} :: tile={tile_id} date={date_str} time={time_str} → no exact file found")
-    _print_folder_snapshot(base, shade_type, tile_id, date_str, osmid, base_name)
     return None
 
-def find_raster_path(base, shade_type, tile, timestamp, osmid, suffix):
-    ts_str = timestamp.strftime('%Y%m%d_%H%M')
-    path = base / shade_type / tile / f"{osmid}_{tile}_{suffix}_{ts_str}.tif"
-    return path if path.exists() else None
+def find_hours_before_rasters(base, shade_type, tile_ids, timestamp, binned_date, osmid, hours_before):
+    """Find all shade rasters for the specified hours before the timestamp across multiple tiles
+    
+    FIXED: Use binned_date for raster lookup, only change the time component
+    """
+    # FIXED: Keep the binned_date, only go back in time (hours)
+    current_time = timestamp
+    target_times = []
+    for hr in range(int(hours_before) + 1):  # 0, 1, 2, ... hours_before
+        target_time = timestamp - timedelta(hours=hr)
+        target_times.append(target_time)
+    
+    found_rasters = []
+    for target_time in target_times:
+        # FIXED: Use binned_date for file lookup, target_time only for hour
+        time_str = target_time.strftime('%H%M')
+        
+        # Try to find raster for each tile at this time
+        tile_rasters = []
+        for tile_id in tile_ids:
+            raster_path = _find_single_raster(base, shade_type, tile_id, binned_date, time_str, osmid, "Shadow")
+            if raster_path:
+                tile_rasters.append(raster_path)
+        
+        if tile_rasters:  # If we found at least one tile for this time
+            found_rasters.append((target_time, tile_rasters))
+    
+    return found_rasters
 
-def find_hours_before_rasters(base, shade_type, tile, timestamp, osmid, hours):
-    paths = []
-    for hr in hours:
-        ts_past = timestamp - timedelta(hours=hr)
-        ts_str = ts_past.strftime('%Y%m%d_%H%M')
-        path = base / shade_type / tile / f"{osmid}_{tile}_Shadow_{ts_str}_LST.tif"
-        if path.exists():
-            paths.append((hr, path))
-    return paths
-
-def zonal(gdf, raster, buffer_m):
-    if buffer_m > 0:
-        gdf = gdf.copy()
-        gdf["geometry"] = gdf.geometry.buffer(buffer_m)
-    stats = zonal_stats(gdf, raster, stats="mean", nodata=np.nan)
-    return stats[0]["mean"] if stats and stats[0]["mean"] is not None else np.nan
+def compute_hours_before_shade(base, shade_type, tile_list, timestamp, binned_date, osmid, hours_before, edge_geom):
+    """Compute average shade fraction for N hours before the timestamp"""
+    raster_times = find_hours_before_rasters(base, shade_type, tile_list, timestamp, binned_date, osmid, hours_before)
+    
+    if not raster_times:
+        print(f"[hours_before] No rasters found for {hours_before}h before {timestamp.strftime('%H%M')} on binned_date={binned_date} → returning NaN")
+        return np.nan
+    
+    shade_values = []
+    for target_time, raster_paths in raster_times:
+        # Create mosaic for this time point
+        sources = []
+        for rp in raster_paths:
+            try:
+                src = rasterio.open(rp)
+                sources.append(src)
+            except Exception as ex:
+                print(f"[warn] Could not open raster {rp}: {ex}")
+                continue
+        
+        if not sources:
+            continue
+            
+        try:
+            if len(sources) == 1:
+                with sources[0] as s:
+                    arr = s.read(1)
+                    transform = s.transform
+                    nodata_val = s.nodata
+                    raster_crs = s.crs
+            else:
+                mosaic, transform = rio_merge(sources)
+                arr = mosaic[0]
+                nodata_val = sources[0].nodata
+                raster_crs = sources[0].crs
+            
+            # Extract value for this time point
+            eg = edge_geom.copy()
+            if raster_crs is not None and (eg.crs is None or eg.crs != raster_crs):
+                try:
+                    eg = eg.to_crs(raster_crs)
+                except Exception as ex:
+                    print(f"[warn] CRS reprojection failed: {ex}")
+                    continue
+            
+            value = zonal_from_array(eg, arr, transform, nodata_val, 0)  # No buffer for hours_before
+            if not np.isnan(value):
+                shade_values.append(value)
+                
+        finally:
+            for s in sources:
+                s.close()
+    
+    if shade_values:
+        avg_shade = np.mean(shade_values)
+        print(f"[hours_before] {len(shade_values)}/{len(raster_times)} rasters found for {hours_before}h before → avg={avg_shade:.3f}")
+        return avg_shade
+    else:
+        print(f"[hours_before] No valid values extracted for {hours_before}h before → returning NaN")
+        return np.nan
 
 def zonal_from_array(gdf, array, transform, nodata_val, buffer_m):
     if buffer_m > 0:
@@ -152,16 +195,10 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
 
     base = Path(config["output_dir"]) / "step5_shade_results" / osmid
     print(f"[env] base shade path: {base} exists={base.exists()}")
-    if base.exists():
-        try:
-            shade_types = [p.name for p in base.iterdir() if p.is_dir()]
-            print(f"[env] shade types under base: {shade_types}")
-            if "combined_shade" not in shade_types:
-                print("[warn] 'combined_shade' folder not found under base – check config/output_dir or osmid")
-        except Exception as ex:
-            print(f"[warn] could not list base: {ex}")
 
-    hours_before = config["extra_outputs"]["hours_before"]
+    # Get hours_before from config
+    hours_before = config.get("extra_outputs", {}).get("hours_before", [2, 4])
+    print(f"[config] hours_before = {hours_before}")
 
     results = []
 
@@ -183,7 +220,7 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
 
     if len(tiles_by_edge_time) > 0:
         t0 = tiles_by_edge_time.iloc[0]
-        print(f"Preview → edge: {t0['edge_uid']}, date: {t0['binned_date']}, time: {t0['rounded_timestamp'].strftime('%H%M')}, tiles: {t0['tile_number']}")
+        print(f"Preview → edge: {t0['edge_uid']}, actual_date: {t0['rounded_timestamp'].strftime('%Y-%m-%d %H%M')}, binned_date: {t0['binned_date']}, tiles: {t0['tile_number']}")
 
     pairs_total = len(tiles_by_edge_time)
     pairs_found = 0
@@ -203,19 +240,23 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
         arr_frac, transform_frac, nodata_frac, raster_crs_frac = mosaic_rasters(base, "combined_shade", tile_list, binned_date, time_str, osmid, base_name="shadow_fraction_on")
 
         if arr is None:
-            print(f"[night] No combined_shade for edge={edge_uid} date={binned_date} time={time_str} tiles={tile_list} → assuming nighttime (shade=1)")
+            print(f"[night] No shade data for edge={edge_uid} binned_date={binned_date} time={time_str} tiles={tile_list} → assuming nighttime (shade=1)")
             pairs_missed += 1
             # CHANGE: Instead of skipping, assume nighttime (shaded = 1)
             for buffer in buffers:
-                suffix = f"_buffer{int(buffer)}" if buffer else ""
-                row[f"combined_shade{suffix}"] = 1.0  # Assume nighttime = fully shaded
-                if arr_frac is None:
-                    row[f"combined_shadow_fraction{suffix}"] = 1.0  # Also assume full shadow fraction
+                suffix = f"_buffer{int(buffer)}m" if buffer else ""
+                # NEW COLUMN NAMES: More intuitive
+                row[f"shade_fraction{suffix}"] = 1.0  # Assume nighttime = fully shaded
+                row[f"shadow_fraction{suffix}"] = 1.0  # Also assume full shadow fraction
+                
+                # NEW: Add hours_before calculations - assume nighttime for missing data
+                for hr in hours_before:
+                    row[f"shade_{hr}h_before{suffix}"] = 1.0  # Nighttime assumption
         else:
             pairs_found += 1
             # Process normally with existing raster data
             for buffer in buffers:
-                suffix = f"_buffer{int(buffer)}" if buffer else ""
+                suffix = f"_buffer{int(buffer)}m" if buffer else ""
                 eg = edge_geom
                 if raster_crs is not None:
                     try:
@@ -223,7 +264,10 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
                             eg = eg.to_crs(raster_crs)
                     except Exception as ex:
                         print(f"[warn] CRS reprojection failed for edge {edge_uid}: {ex}")
-                row[f"combined_shade{suffix}"] = zonal_from_array(eg, arr, transform, nodata_val, buffer)
+                
+                # NEW COLUMN NAMES + PRECISION
+                shade_val = zonal_from_array(eg, arr, transform, nodata_val, buffer)
+                row[f"shade_fraction{suffix}"] = round(shade_val, 2) if not np.isnan(shade_val) else np.nan
                 
                 if arr_frac is not None:
                     egf = edge_geom
@@ -233,18 +277,41 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
                                 egf = egf.to_crs(raster_crs_frac)
                         except Exception as ex:
                             print(f"[warn] CRS reprojection failed (frac) for edge {edge_uid}: {ex}")
-                    row[f"combined_shadow_fraction{suffix}"] = zonal_from_array(egf, arr_frac, transform_frac, nodata_frac, buffer)
+                    shadow_val = zonal_from_array(egf, arr_frac, transform_frac, nodata_frac, buffer)
+                    row[f"shadow_fraction{suffix}"] = round(shadow_val, 2) if not np.isnan(shadow_val) else np.nan
+                
+                # FIXED: Add hours_before calculations - pass binned_date correctly
+                for hr in hours_before:
+                    shade_before = compute_hours_before_shade(base, "combined_shade", tile_list, timestamp, binned_date, osmid, hr, edge_geom)
+                    row[f"shade_{hr}h_before{suffix}"] = round(shade_before, 2) if not np.isnan(shade_before) else np.nan
 
         results.append(row)
 
     # Merge into edges
     df = pd.DataFrame(results)
-    merged = edges.merge(df, on="edge_uid", how="left")
-    merged.to_file(output_path, driver="GeoJSON")
+    
+    # FIXED: Only merge the edges that were actually processed (for correct preview)
+    processed_edge_uids = set(df["edge_uid"])
+    edges_processed = edges[edges["edge_uid"].isin(processed_edge_uids)]
+    merged = edges_processed.merge(df, on="edge_uid", how="left")
+    
+    # Round all shade/shadow columns to 2 decimal places for consistent file size
+    shade_cols = [c for c in merged.columns if 'shade' in c and c not in ['edge_uid', 'timestamp']]
+    for col in shade_cols:
+        if merged[col].dtype in ['float64', 'float32']:
+            merged[col] = merged[col].round(2)
+    
+    # For the final output, merge with ALL edges
+    final_merged = edges.merge(df, on="edge_uid", how="left")
+    for col in shade_cols:
+        if final_merged[col].dtype in ['float64', 'float32']:
+            final_merged[col] = final_merged[col].round(2)
+    
+    final_merged.to_file(output_path, driver="GeoJSON")
     print(f"✅ Saved: {output_path}")
 
     # ===== Summary statistics and sample preview =====
-    value_cols = [c for c in merged.columns if c.startswith("combined_shade") or c.startswith("combined_shadow_fraction")]
+    value_cols = [c for c in merged.columns if 'shade' in c and c not in ['edge_uid', 'timestamp']]
     print("\n===== RUN SUMMARY =====")
     print(f"Pairs total:  {pairs_total}")
     print(f"Pairs found:  {pairs_found}")
@@ -254,13 +321,13 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
         if len(ser) == 0:
             print(f"{col}: no values")
         else:
-            print(f"{col}: n={len(ser)} min={ser.min():.4f} p25={ser.quantile(0.25):.4f} median={ser.median():.4f} mean={ser.mean():.4f} p75={ser.quantile(0.75):.4f} max={ser.max():.4f}")
+            print(f"{col}: n={len(ser)} min={ser.min():.2f} p25={ser.quantile(0.25):.2f} median={ser.median():.2f} mean={ser.mean():.2f} p75={ser.quantile(0.75):.2f} max={ser.max():.2f}")
 
-    # Print a compact preview of a few rows (selected columns only)
+    # FIXED: Print preview of PROCESSED data only (not full dataset)
     preview_cols = ["edge_uid", "timestamp"] + value_cols
     preview = merged[preview_cols].head(12)
     try:
-        print("\n===== PREVIEW (first 12 rows) =====")
+        print(f"\n===== PREVIEW (processed {len(merged)} edges) =====")
         print(preview.to_string(index=False))
     except Exception:
         print("[warn] could not print preview table")
@@ -282,7 +349,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", required=True)
     parser.add_argument("--config", default="config.yaml")
     parser.add_argument("--osmid", required=True)
-    parser.add_argument("--buffers", nargs="+", type=float, default=[0])  # CHANGE: Default to only buffer=0
+    parser.add_argument("--buffers", nargs="+", type=float, default=[0])
     parser.add_argument("--include_building", action="store_true")
     parser.add_argument("--sample_n", type=int, default=0, help="Process only N (edge_uid, time) pairs for a quick test. 0=all.")
     parser.add_argument("--sample_seed", type=int, default=42, help="Random seed for sampling.")
@@ -301,32 +368,3 @@ if __name__ == "__main__":
         args.sample_seed,
         args.sample,
     )
-
-
-# UPDATED EXAMPLE COMMANDS:
-# Quick sample run (no buffers, fast):
-# python aggregate_edge_shade_stats.py \
-#   --points results/output/step6_final_result/cbdb17d4/binned_dataset_2024.geojson \
-#   --edges  data/clean_data/strava/back_bay_edges_aoi.geojson \
-#   --output results/output/step6_final_result/cbdb17d4/edge_stats_sample.geojson \
-#   --config config.yaml \
-#   --osmid cbdb17d4 \
-#   --sample
-
-# Full run (no buffers, for first version to partners):
-# nohup python aggregate_edge_shade_stats.py \
-#   --points results/output/step6_final_result/cbdb17d4/binned_dataset_2024.geojson \
-#   --edges  data/clean_data/strava/back_bay_edges_aoi.geojson \
-#   --output results/output/step6_final_result/cbdb17d4/edge_stats_v1_no_buffers.geojson \
-#   --config config.yaml \
-#   --osmid cbdb17d4 \
-#   > logs/aggregate_v1_no_buffers.log 2>&1 &
-
-# If you need buffers later (slower):
-# python aggregate_edge_shade_stats.py \
-#   --points results/output/step6_final_result/cbdb17d4/binned_dataset_2024.geojson \
-#   --edges  data/clean_data/strava/back_bay_edges_aoi.geojson \
-#   --output results/output/step6_final_result/cbdb17d4/edge_stats_with_buffers.geojson \
-#   --config config.yaml \
-#   --osmid cbdb17d4 \
-#   --buffers 0 5 10
