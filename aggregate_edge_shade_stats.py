@@ -13,33 +13,22 @@ import os
 
 from glob import glob
 
-def _list_available_times(tile_folder: Path, osmid: str, tile_id: str, date_str: str, base_name: str) -> list:
-    pattern1 = str(tile_folder / f"{osmid}_{tile_id}_{base_name}_{date_str}_*.tif")
-    files = glob(pattern1)
-    times = []
-    for fp in files:
-        name = os.path.basename(fp)
-        # expected like: {osmid}_{tile_id}_{base}_{YYYYMMDD}_{HHMM}[...].tif
-        parts = name.split("_")
-        # find the part immediately after date_str
-        for i, p in enumerate(parts):
-            if p == date_str and i + 1 < len(parts):
-                # strip extension and trailing suffixes
-                time_part = parts[i+1]
-                time_part = time_part.replace(".tif", "")
-                times.append(time_part)
-                break
-    return sorted(set(times))
-
 def _candidate_filenames(osmid, tile_id, date_str, time_str, base_name="Shadow"):
-    # Match final_corrected_extraction pattern: ..._{date}_{time}_LST.tif (and without _LST)
-    return [
-        f"{osmid}_{tile_id}_{base_name}_{date_str}_{time_str}_LST.tif",
-        f"{osmid}_{tile_id}_{base_name}_{date_str}_{time_str}.tif",
-        # A couple of safe variants just in case
-        f"{osmid}_{tile_id}_{base_name.capitalize()}_{date_str}_{time_str}_LST.tif",
-        f"{osmid}_{tile_id}_{base_name.capitalize()}_{date_str}_{time_str}.tif",
-    ]
+    if base_name == "shadow_fraction_on":
+        # Special case for shadow fraction files (no _LST suffix)
+        return [
+            f"{osmid}_{tile_id}_{base_name}_{date_str}_{time_str}.tif",
+            f"{osmid}_{tile_id}_{base_name}_{date_str}_{time_str}_LST.tif",  # just in case
+        ]
+    else:
+        # Standard shadow files
+        return [
+            f"{osmid}_{tile_id}_{base_name}_{date_str}_{time_str}_LST.tif",
+            f"{osmid}_{tile_id}_{base_name}_{date_str}_{time_str}.tif",
+            # A couple of safe variants just in case
+            f"{osmid}_{tile_id}_{base_name.capitalize()}_{date_str}_{time_str}_LST.tif",
+            f"{osmid}_{tile_id}_{base_name.capitalize()}_{date_str}_{time_str}.tif",
+        ]
 
 def _find_single_raster(base, shade_type, tile_id, date_str, time_str, osmid, base_name="Shadow"):
     folder_num = tile_id.split('_')[-1] if '_' in tile_id else tile_id
@@ -56,10 +45,9 @@ def _find_single_raster(base, shade_type, tile_id, date_str, time_str, osmid, ba
 def find_hours_before_rasters(base, shade_type, tile_ids, timestamp, binned_date, osmid, hours_before):
     """Find all shade rasters for the specified hours before the timestamp across multiple tiles
     
-    FIXED: Use binned_date for raster lookup, only change the time component
+    Use binned_date for raster lookup, only change the time component
     """
-    # FIXED: Keep the binned_date, only go back in time (hours)
-    current_time = timestamp
+    # Keep the binned_date, only go back in time (hours)
     target_times = []
     for hr in range(int(hours_before) + 1):  # 0, 1, 2, ... hours_before
         target_time = timestamp - timedelta(hours=hr)
@@ -67,7 +55,7 @@ def find_hours_before_rasters(base, shade_type, tile_ids, timestamp, binned_date
     
     found_rasters = []
     for target_time in target_times:
-        # FIXED: Use binned_date for file lookup, target_time only for hour
+        # Use binned_date for file lookup, target_time only for hour
         time_str = target_time.strftime('%H%M')
         
         # Try to find raster for each tile at this time
@@ -87,7 +75,6 @@ def compute_hours_before_shade(base, shade_type, tile_list, timestamp, binned_da
     raster_times = find_hours_before_rasters(base, shade_type, tile_list, timestamp, binned_date, osmid, hours_before)
     
     if not raster_times:
-        print(f"[hours_before] No rasters found for {hours_before}h before {timestamp.strftime('%H%M')} on binned_date={binned_date} → returning NaN")
         return np.nan
     
     shade_values = []
@@ -137,10 +124,8 @@ def compute_hours_before_shade(base, shade_type, tile_list, timestamp, binned_da
     
     if shade_values:
         avg_shade = np.mean(shade_values)
-        print(f"[hours_before] {len(shade_values)}/{len(raster_times)} rasters found for {hours_before}h before → avg={avg_shade:.3f}")
         return avg_shade
     else:
-        print(f"[hours_before] No valid values extracted for {hours_before}h before → returning NaN")
         return np.nan
 
 def zonal_from_array(gdf, array, transform, nodata_val, buffer_m):
@@ -235,21 +220,23 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
         row = {"edge_uid": edge_uid, "timestamp": timestamp}
 
         time_str = timestamp.strftime('%H%M')
+        
+        # 1. CURRENT SHADE (instantaneous): Shadow files
         arr, transform, nodata_val, raster_crs = mosaic_rasters(base, "combined_shade", tile_list, binned_date, time_str, osmid, base_name="Shadow")
-        # If you also need shadow fraction later, keep this attempt but it may not exist in all runs
+        
+        # 2. CURRENT SHADOW FRACTION (since dawn): shadow_fraction_on files  
         arr_frac, transform_frac, nodata_frac, raster_crs_frac = mosaic_rasters(base, "combined_shade", tile_list, binned_date, time_str, osmid, base_name="shadow_fraction_on")
 
         if arr is None:
-            print(f"[night] No shade data for edge={edge_uid} binned_date={binned_date} time={time_str} tiles={tile_list} → assuming nighttime (shade=1)")
+            print(f"[night] No shade data for edge={edge_uid} binned_date={binned_date} time={time_str} tiles={tile_list} → assuming nighttime")
             pairs_missed += 1
-            # CHANGE: Instead of skipping, assume nighttime (shaded = 1)
+            # Assume nighttime for all metrics
             for buffer in buffers:
                 suffix = f"_buffer{int(buffer)}m" if buffer else ""
-                # NEW COLUMN NAMES: More intuitive
-                row[f"shade_fraction{suffix}"] = 1.0  # Assume nighttime = fully shaded
-                row[f"shadow_fraction{suffix}"] = 1.0  # Also assume full shadow fraction
+                row[f"current_shade{suffix}"] = 1.0  # RENAMED: Current instantaneous shade
+                row[f"shadow_fraction{suffix}"] = 1.0  # Current fraction since dawn
                 
-                # NEW: Add hours_before calculations - assume nighttime for missing data
+                # Hours before calculations
                 for hr in hours_before:
                     row[f"shade_{hr}h_before{suffix}"] = 1.0  # Nighttime assumption
         else:
@@ -265,10 +252,11 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
                     except Exception as ex:
                         print(f"[warn] CRS reprojection failed for edge {edge_uid}: {ex}")
                 
-                # NEW COLUMN NAMES + PRECISION
+                # 1. CURRENT SHADE (instantaneous) - RENAMED for clarity
                 shade_val = zonal_from_array(eg, arr, transform, nodata_val, buffer)
-                row[f"shade_fraction{suffix}"] = round(shade_val, 2) if not np.isnan(shade_val) else np.nan
+                row[f"current_shade{suffix}"] = round(shade_val, 2) if not np.isnan(shade_val) else np.nan
                 
+                # 2. CURRENT SHADOW FRACTION (since dawn)
                 if arr_frac is not None:
                     egf = edge_geom
                     if raster_crs_frac is not None:
@@ -279,8 +267,10 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
                             print(f"[warn] CRS reprojection failed (frac) for edge {edge_uid}: {ex}")
                     shadow_val = zonal_from_array(egf, arr_frac, transform_frac, nodata_frac, buffer)
                     row[f"shadow_fraction{suffix}"] = round(shadow_val, 2) if not np.isnan(shadow_val) else np.nan
+                else:
+                    row[f"shadow_fraction{suffix}"] = np.nan
                 
-                # FIXED: Add hours_before calculations - pass binned_date correctly
+                # 3. HOURS BEFORE CALCULATIONS
                 for hr in hours_before:
                     shade_before = compute_hours_before_shade(base, "combined_shade", tile_list, timestamp, binned_date, osmid, hr, edge_geom)
                     row[f"shade_{hr}h_before{suffix}"] = round(shade_before, 2) if not np.isnan(shade_before) else np.nan
@@ -290,13 +280,13 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
     # Merge into edges
     df = pd.DataFrame(results)
     
-    # FIXED: Only merge the edges that were actually processed (for correct preview)
+    # Only merge the edges that were actually processed (for correct preview)
     processed_edge_uids = set(df["edge_uid"])
     edges_processed = edges[edges["edge_uid"].isin(processed_edge_uids)]
     merged = edges_processed.merge(df, on="edge_uid", how="left")
     
     # Round all shade/shadow columns to 2 decimal places for consistent file size
-    shade_cols = [c for c in merged.columns if 'shade' in c and c not in ['edge_uid', 'timestamp']]
+    shade_cols = [c for c in merged.columns if ('shade' in c or 'shadow' in c) and c not in ['edge_uid', 'timestamp']]
     for col in shade_cols:
         if merged[col].dtype in ['float64', 'float32']:
             merged[col] = merged[col].round(2)
@@ -311,11 +301,12 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
     print(f"✅ Saved: {output_path}")
 
     # ===== Summary statistics and sample preview =====
-    value_cols = [c for c in merged.columns if 'shade' in c and c not in ['edge_uid', 'timestamp']]
+    value_cols = [c for c in merged.columns if ('shade' in c or 'shadow' in c) and c not in ['edge_uid', 'timestamp']]
     print("\n===== RUN SUMMARY =====")
     print(f"Pairs total:  {pairs_total}")
     print(f"Pairs found:  {pairs_found}")
     print(f"Pairs missed: {pairs_missed} (treated as nighttime)")
+    
     for col in value_cols:
         ser = merged[col].dropna()
         if len(ser) == 0:
@@ -323,7 +314,7 @@ def main(points_path, edges_path, output_path, config_path, osmid, buffers, incl
         else:
             print(f"{col}: n={len(ser)} min={ser.min():.2f} p25={ser.quantile(0.25):.2f} median={ser.median():.2f} mean={ser.mean():.2f} p75={ser.quantile(0.75):.2f} max={ser.max():.2f}")
 
-    # FIXED: Print preview of PROCESSED data only (not full dataset)
+    # Print preview of PROCESSED data only
     preview_cols = ["edge_uid", "timestamp"] + value_cols
     preview = merged[preview_cols].head(12)
     try:
@@ -368,3 +359,17 @@ if __name__ == "__main__":
         args.sample_seed,
         args.sample,
     )
+
+# FINAL COLUMN EXPLANATION:
+# 
+# 1. current_shade: Instantaneous shade at timestamp (0=no shade, 1=full shade)
+#    → Uses: cbdb17d4_p_5_Shadow_20240819_1300_LST.tif
+# 
+# 2. shadow_fraction: Cumulative shadow fraction since dawn at timestamp  
+#    → Uses: cbdb17d4_p_5_shadow_fraction_on_20240819_1300.tif
+# 
+# 3. shade_2h_before: Average shade 2h before timestamp
+#    → Uses: Average of Shadow_20240819_1100_LST.tif, 1200_LST.tif, 1300_LST.tif
+# 
+# 4. shade_4h_before: Average shade 4h before timestamp  
+#    → Uses: Average of Shadow_20240819_0900_LST.tif through 1300_LST.tif
