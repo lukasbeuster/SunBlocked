@@ -15,10 +15,13 @@ if not points_path.exists():
 
 pts = gpd.read_file(points_path)
 edges = gpd.read_file(edges_path)
+print(f"Loaded points: {len(pts):,} rows")
+print(f"Loaded edges: {len(edges):,} rows")
 
 # Normalize id column name and dtype on edges
 if "edge_uid" not in edges.columns and "edgeUID" in edges.columns:
     edges = edges.rename(columns={"edgeUID": "edge_uid"})
+    print("Renamed 'edgeUID' to 'edge_uid' in edges")
 if "edge_uid" not in edges.columns:
     raise ValueError("edges file must contain an 'edge_uid' (or 'edgeUID') column")
 edges["edge_uid"] = edges["edge_uid"].astype(str)
@@ -26,6 +29,7 @@ edges["edge_uid"] = edges["edge_uid"].astype(str)
 # Ensure required columns exist in points
 if "edge_uid" not in pts.columns and "edgeUID" in pts.columns:
     pts = pts.rename(columns={"edgeUID": "edge_uid"})
+    print("Renamed 'edgeUID' to 'edge_uid' in points")
 if "edge_uid" not in pts.columns:
     raise ValueError("points dataset must include 'edge_uid' so we can aggregate to edges.\n"
                      "If it's missing, make sure your prep step preserved it.")
@@ -53,22 +57,26 @@ if not shade_cols:
 # 3) Aggregate by edge_uid × time
 if stat not in {"mean", "median"}:
     raise ValueError("stat must be 'mean' or 'median'")
+print(f"Aggregating shade columns by ['edge_uid', 'time'] using '{stat}'")
 agg = (
     pts.groupby(["edge_uid", "time"], as_index=False)[shade_cols]
        .agg(stat)
 )
+print(f"Aggregation complete: {len(agg):,} rows")
 
 # 4) Attach geometries
 out = agg.merge(edges[["edge_uid", "geometry"]], on="edge_uid", how="left")
 missing_geom = out["geometry"].isna().sum()
 if missing_geom:
     print(f"[warn] {missing_geom} edge_uid rows had no matching geometry in edges file.", file=sys.stderr)
+print(f"Merged geometries, resulting rows: {len(out):,}")
 
 gout = gpd.GeoDataFrame(out, geometry="geometry", crs=edges.crs)
 
 # 5) Save
 save_path = points_path.parent / f"edges_aggregated_all_months_{stat}.geojson"
 save_path.parent.mkdir(parents=True, exist_ok=True)
+print(f"Saving aggregated edges to {save_path}")
 gout.to_file(save_path, driver="GeoJSON")
 
 # 6) Report
