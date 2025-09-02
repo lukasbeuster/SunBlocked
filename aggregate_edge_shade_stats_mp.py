@@ -433,3 +433,14 @@ if __name__ == "__main__":
 # 
 # 4. shade_4h_before: Average shade 4h before timestamp  
 #    → Uses: Average of Shadow_20240819_0900_LST.tif through 1300_LST.tif
+
+### How to run:
+# nohup python aggregate_edge_shade_stats_mp.py \
+#   --points results/output/step6_final_result/cbdb17d4/binned_dataset_2024.geojson \
+#   --edges data/clean_data/strava/back_bay_edges_aoi.geojson \
+#   --output results/output/step6_final_result/cbdb17d4/edge_stats_final_4months.geojson \
+#   --config config.yaml \
+#   --osmid cbdb17d4 \
+#   --n_processes 25 \
+#   --batch_size 1500 \
+#   > logs/aggregate_4month_full.log 2>&1 &
