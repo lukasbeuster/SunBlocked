@@ -25,13 +25,36 @@ Please report bugs, suggest improvements and give feedback in the form [here](ht
 
 ## How It Works
 
-The pipeline is broken down into five distinct, sequential steps, each run by a simple command. This modular approach allows you to inspect the output of each stage and re-run steps with different parameters without starting from scratch.
+The pipeline is broken down into seven distinct, sequential steps, each run by a simple command. This modular approach allows you to inspect the output of each stage and re-run steps with different parameters without starting from scratch.
 
 1.  **`check`**: Analyzes your dataset and determines the geographic tiles needed for the analysis.
 2.  **`download`**: Fetches all raw data (DSMs, imagery, building footprints) for the selected tiles.
 3.  **`segment`**: Runs the AI model to identify trees and create canopy masks.
-4.  **`process-rasters`**: A heavy-lifting step that processes the raw DSMs into analysis-ready terrain and canopy models.
-5.  **`process-shade`**: The final step, which runs the shade simulation and merges the results back into your original dataset.
+4.  **`process-rasters`**: Processes the raw DSMs into analysis-ready terrain and canopy models.
+5.  **`process-dataset`**: Bins your dataset temporally and spatially, preparing it for shade simulation.
+6.  **`simulate-shade`**: Runs computationally intensive shade simulations (can be run independently).
+7.  **`extract-shade`**: Extracts shade values from rasters and merges them back into your dataset.
+
+**Alternative: Monolithic Step 5**
+- **`process-shade`**: Combines steps 5-7 into a single command (legacy approach).
+
+
+
+## Split Pipeline Benefits
+
+The new 3-step approach (Steps 5-7) offers several advantages over the monolithic approach:
+
+**🔄 Resumability**: Restart from any step if one fails (especially useful for computationally heavy simulations)
+
+**⚡ Parallelization**: Run simulations on high-compute nodes while running other steps on regular machines
+
+**🐛 Debugging**: Inspect intermediate outputs (binned datasets, simulation rasters) for validation
+
+**💾 Resource Management**: Control memory usage by processing steps independently
+
+**🏗️ Scalability**: Better suited for large datasets spanning multiple years or regions
+
+**🎯 Selective Processing**: Re-run only specific steps when parameters change (e.g., re-extract with different buffer sizes without re-simulating)
 
 ## 🚀 Getting Started
 
@@ -171,21 +194,70 @@ python pipeline.py process-rasters
 
 Output: CHM and DTM raster per tile in `{output_dir}/step4_raster_processing/{osmid}`
 
-### Step 5: Process Shade
+### Step 5: Dataset Processing and Binning
 
-This is the final step. It runs the shade simulation using the prepared data and merges the results back into your original dataset.
+```bash
+python pipeline.py process-dataset
+```
+
+This step processes your dataset by:
+- Detecting years present in your data (automatically filters to years with configuration)
+- Binning timestamps around seasonal reference points (solstices)
+- Assigning seasonal parameters (summer/winter transmissivity values)
+- Combining multiple years into a single dataset for efficient processing
+
+Output: `{output_dir}/step6_final_result/{osmid}/binned_dataset_combined_{years}.geojson`
+
+### Step 6: Shade Simulation
+
+```bash
+python pipeline.py simulate-shade
+```
+
+This computationally intensive step:
+- Loads the combined binned dataset from Step 5
+- Runs shade simulations for each tile and binned date
+- Intelligently skips existing simulations (resumable)
+- Applies correct seasonal parameters (summer: 10% transmissivity, winter: 45%)
+
+Output: Raster files in `{output_dir}/step5_shade_results/{osmid}/`
+
+### Step 7: Shade Extraction and Final Processing
+
+```bash
+python pipeline.py extract-shade
+```
+
+This final step:
+- Extracts shade values from simulation rasters
+- Merges shade data back with your original dataset
+- Aggregates results and creates final output
+
+Output: `{output_dir}/step6_final_result/{osmid}/shaded_dataset_split.geojson`
+
+### Alternative: Monolithic Processing (Legacy)
 
 ```bash
 python pipeline.py process-shade
 ```
 
-Your final, shade-enhanced dataset will be saved in `{output_dir}/step5_final_results/{osmid}/{file_name}.geojson`.
+Runs steps 5-7 combined in a single command. Useful for simple workflows but less flexible for debugging or resuming interrupted runs.
 
 ### Run All Steps Automatically
 
 For automated workflows, you can execute the entire pipeline with a single command. This will skip the interactive confirmation step and the checkpoints.
 
 ```bash
+# Option 1: Split pipeline (recommended for large datasets)
+python pipeline.py check --min-points 10
+python pipeline.py download
+python pipeline.py segment  
+python pipeline.py process-rasters
+python pipeline.py process-dataset
+python pipeline.py simulate-shade
+python pipeline.py extract-shade
+
+# Option 2: Automated pipeline (uses monolithic step 5, recommended to (re-)run smaller datasets)
 python pipeline.py run-all --min-points 10
 ```
 
@@ -266,3 +338,46 @@ output_directory/
 ## Cite
 
 Ozberkman, D., van Selm, M., Venverloo, T., and Beuster, L.: Sun Blocked: Integrating Shade into Urban Climate Assessments, 12th International Conference on Urban Climate, Rotterdam, The Netherlands, 7–11 Jul 2025, ICUC12-797, https://doi.org/10.5194/icuc12-797, 2025.
+
+
+### Split Pipeline Troubleshooting
+
+**Step Dependencies**: Each step checks for prerequisites:
+- `simulate-shade` requires `process-dataset` to be completed first
+- `extract-shade` requires `simulate-shade` to be completed first
+
+**Check Progress**: Use `run_info.json` in your output directory to see completion status:
+```bash
+cat results/output/run_info.json
+```
+
+**Resume from Specific Step**: If a step fails, you can resume from that point:
+```bash
+# If simulations failed, restart from step 6
+python pipeline.py simulate-shade
+
+# If extraction failed, restart from step 7  
+python pipeline.py extract-shade
+```
+
+
+
+## Recent Updates
+
+### Pipeline Split Implementation (v2.0)
+
+- **Modular Processing**: Step 5 has been split into three independent steps (5-7) for better control and resumability
+- **Multi-Year Support**: Automatic detection and combination of multiple years in datasets
+- **Season Assignment Validation**: Confirmed correct assignment of seasonal parameters (summer: 10% transmissivity, winter: 45% transmissivity)
+- **Enhanced Error Handling**: Each step validates prerequisites and provides clear error messages
+- **State Management**: Improved `run_info.json` tracking for workflow progress and resumability
+
+### Flexible data loader
+- **Added support for various input datatypes**: Now supports loading of CSV, Parquet, Pickle, GeoJSON, etc.
+
+### Bug Fixes
+
+- **Fixed simulation function dependency**: Resolved `_subsets()` reference error in shade simulations
+- **Corrected year processing**: Pipeline now uses actual years from data rather than all config years
+- **Improved geometry handling**: Better DataFrame/GeoDataFrame conversion in extraction pipeline
+

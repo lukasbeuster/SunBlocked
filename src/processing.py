@@ -172,11 +172,9 @@ def run_shade_processing(config, osmid, year, year_data):
         empty_gdf = gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
         print(f"User Warning: The dataset result for year {year} is empty. Make sure dataset geometry overlaps with processed rasters in step 4")
         return empty_gdf
-    # TODO: revert back to original to re-activate the shade simulations and shade data extraction.
-    return dataset_gdf
 
     # TODO: split this so that this function is dependent on inputs activated separately. 
-    # run_shade_simulations(tile_grouped_days, dataset_gdf, osmid, year, config)
+    run_shade_simulations(tile_grouped_days, dataset_gdf, osmid, year, config)
 
     dataset_with_shade = extract_and_merge_shade_values(dataset_gdf, osmid, binned, config)
 
@@ -225,7 +223,7 @@ def run_shade_simulations(tile_grouped_days, dataset_gdf, osmid, year, config):
     winter_params = config['seasons']['winter']
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=config['max_workers']) as executor:
-        total_subsets = sum(1 for _ in _subsets())  # Count total subsets for progress
+        total_subsets = sum(len(dates) for dates in tile_grouped_days.values())  # Count total subsets for progress
         print("Processing {} data subsets with {} workers...".format(total_subsets, config['max_workers']))
         for tile_id, dates in tile_grouped_days.items():
             tile_dataset = dataset_gdf[dataset_gdf['tile_number'] == tile_id]
@@ -1679,3 +1677,222 @@ def filter_intervals(intervals, shadow_files_exist):
         intervals_needed = False # don't need to simulate any
 
     return intervals_needed
+
+# =============================================================================
+# SPLIT PIPELINE FUNCTIONS
+# =============================================================================
+
+def process_dataset_only(year_data, year, osmid, config):
+    """
+    Standalone function for dataset processing and binning.
+    Extracted from run_shade_processing to allow independent execution.
+    
+    Parameters:
+        year_data (DataFrame): Dataset for the year to process
+        year (int): Year being processed
+        osmid (str): OSM ID used to locate raster directories
+        config (dict): Configuration dictionary
+        
+    Returns:
+        tuple: (dataset_gdf, tile_grouped_days, original_dataset, bin_output_path)
+    """
+    binned = int(config['simulation']['bin_size']) > 0
+    
+    dataset_gdf, tile_grouped_days, original_dataset = process_dataset(year_data, year, osmid, config)
+    
+    # Save binned dataset to disk
+    output_dir = Path(config['output_dir'])
+    final_output_dir = output_dir / f"step6_final_result/{osmid}"
+    final_output_dir.mkdir(parents=True, exist_ok=True)
+    bin_output_path = final_output_dir / f"binned_dataset_{year}.geojson" 
+    dataset_gdf.to_file(bin_output_path, driver="GeoJSON")
+    print(f"\n✅ Dataset processing complete! Tiles and binned timestamps for {year} saved to: {bin_output_path}")
+    
+    return dataset_gdf, tile_grouped_days, original_dataset, bin_output_path
+
+def run_shade_simulations_only(tile_grouped_days, dataset_gdf, osmid, year, config):
+    """
+    Standalone function for running shade simulations.
+    Extracted from run_shade_processing to allow independent execution.
+    
+    Parameters:
+        tile_grouped_days (dict): Mapping of tiles to binned dates and timestamps
+        dataset_gdf (GeoDataFrame): Processed dataset with binned information
+        osmid (str): OSM ID used for output paths
+        year (int): Year being processed
+        config (dict): Configuration dictionary
+        
+    Returns:
+        None (results saved to disk as raster files)
+    """
+    if tile_grouped_days is None:
+        print(f"Warning: No tile data available for year {year}. Skipping simulation.")
+        return
+        
+    print(f"\n🔥 Starting shade simulations for {year}...")
+    run_shade_simulations(tile_grouped_days, dataset_gdf, osmid, year, config)
+    print(f"✅ Shade simulations complete for {year}!")
+
+def extract_and_merge_shade_values_only(dataset_gdf, osmid, config, original_dataset):
+    """
+    Standalone function for extracting and merging shade values.
+    Extracted from run_shade_processing to allow independent execution.
+    
+    Parameters:
+        dataset_gdf (GeoDataFrame): Processed dataset with binned information
+        osmid (str): OSM ID used for locating raster files
+        config (dict): Configuration dictionary
+        original_dataset (DataFrame): Original dataset for aggregation
+        
+    Returns:
+        GeoDataFrame: Final processed dataset with shade metrics
+    """
+    binned = int(config['simulation']['bin_size']) > 0
+    
+    print(f"\n📊 Extracting shade values...")
+    dataset_with_shade = extract_and_merge_shade_values(dataset_gdf, osmid, binned, config)
+    
+    print(f"📈 Aggregating results...")
+    dataset_final = aggregate_results(dataset_with_shade, original_dataset, config)
+    
+    # Ensure final result is a GeoDataFrame with proper CRS
+    if hasattr(dataset_final, 'set_crs'):
+        dataset_final = dataset_final.set_crs("EPSG:4326", allow_override=True)
+    elif 'geometry' in dataset_final.columns:
+        import geopandas as gpd
+        dataset_final = gpd.GeoDataFrame(dataset_final, geometry='geometry', crs="EPSG:4326")
+    
+    print(f"✅ Shade extraction and merging complete!")
+    return dataset_final
+
+def reconstruct_tile_grouped_days(dataset_gdf):
+    """
+    Reconstructs tile_grouped_days structure from a binned dataset.
+    This is needed when loading saved binned data for simulation.
+    
+    Parameters:
+        dataset_gdf (GeoDataFrame): Binned dataset with tile_number, binned_date, rounded_timestamp
+        
+    Returns:
+        dict: tile_grouped_days structure {tile_id: {sim_date: [timestamps]}}
+    """
+    from collections import defaultdict
+    
+    tile_grouped_days = defaultdict(lambda: defaultdict(list))
+    
+    # Group by tile and binned_date, collect rounded_timestamps
+    grouped = dataset_gdf.groupby(['tile_number', 'binned_date'])['rounded_timestamp'].apply(list).reset_index()
+    
+    for _, row in grouped.iterrows():
+        tile_id = row['tile_number']
+        binned_date = pd.to_datetime(row['binned_date']).date()
+        timestamps = [pd.to_datetime(ts) for ts in row['rounded_timestamp']]
+        
+        # Convert to the format expected by run_shade_simulations
+        # Format: {final_timestamp: [intermediate_timestamps]}
+        if timestamps:
+            # Use the first timestamp as the final timestamp, rest as intermediate
+            final_timestamp = timestamps[0]
+            intermediate_timestamps = timestamps[1:] if len(timestamps) > 1 else []
+            tile_grouped_days[tile_id][binned_date] = [final_timestamp, intermediate_timestamps]
+    
+    # Convert defaultdict to regular dict
+    return {tile_id: dict(dates) for tile_id, dates in tile_grouped_days.items()}
+
+
+def process_full_dataset_combined(dataset, osmid, config):
+    """
+    Processes all years in a dataset and combines the results.
+    
+    Parameters:
+        dataset (DataFrame): Full dataset to process
+        osmid (str): OSM ID used to locate raster directories
+        config (dict): Configuration dictionary
+        
+    Returns:
+        tuple: (combined_dataset_gdf, combined_tile_grouped_days, combined_original_dataset, bin_output_path)
+    """
+    import pandas as pd
+    import geopandas as gpd
+    from pathlib import Path
+    
+    timestamp_col = config['columns']['timestamp']
+    dataset[timestamp_col] = pd.to_datetime(dataset[timestamp_col], errors='coerce')
+    
+    # Remove invalid timestamps
+    n_invalid = dataset[timestamp_col].isna().sum()
+    if n_invalid > 0:
+        print(f"{n_invalid} rows failed to parse timestamps and became NaT")
+        dataset = dataset.dropna(subset=[timestamp_col])
+    
+    # Find years present in data that also have config
+    actual_years = sorted(dataset[timestamp_col].dt.year.unique())
+    config_years = [int(y) for y in config['year_configs'].keys()]
+    processable_years = [y for y in actual_years if y in config_years]
+    
+    print(f"📊 Processing years: {processable_years}")
+    
+    if not processable_years:
+        print("❌ No years found with both data and configuration")
+        return None, None, None, None
+    
+    all_year_datasets = []
+    all_year_tile_groups = {}
+    all_year_originals = []
+    
+    # Process each year separately then combine
+    for year in processable_years:
+        print(f"\n🔄 Processing year {year}...")
+        year_data = dataset[dataset[timestamp_col].dt.year == year].copy()
+        
+        if year_data.empty:
+            print(f"   No data for year {year}, skipping")
+            continue
+            
+        # Process this year using the original single-year function
+        dataset_gdf, tile_grouped_days, original_dataset, _ = process_dataset_only(year_data, year, osmid, config)
+        
+        if dataset_gdf is not None and not dataset_gdf.empty:
+            all_year_datasets.append(dataset_gdf)
+            all_year_originals.append(original_dataset)
+            
+            # Merge tile_grouped_days for this year
+            if tile_grouped_days:
+                for tile_id, dates in tile_grouped_days.items():
+                    if tile_id not in all_year_tile_groups:
+                        all_year_tile_groups[tile_id] = {}
+                    all_year_tile_groups[tile_id].update(dates)
+                    
+            print(f"   ✅ Year {year}: {len(dataset_gdf)} rows processed")
+    
+    if not all_year_datasets:
+        print("❌ No data was successfully processed")
+        return None, None, None, None
+    
+    # Combine all years
+    print(f"\n🔗 Combining {len(all_year_datasets)} year datasets...")
+    combined_dataset_gdf = pd.concat(all_year_datasets, ignore_index=True)
+    combined_original_dataset = pd.concat(all_year_originals, ignore_index=True)
+    
+    # Ensure it's a GeoDataFrame
+    if not isinstance(combined_dataset_gdf, gpd.GeoDataFrame):
+        combined_dataset_gdf = gpd.GeoDataFrame(combined_dataset_gdf, geometry='geometry')
+    
+    # Save combined binned dataset to disk
+    output_dir = Path(config['output_dir'])
+    final_output_dir = output_dir / f"step6_final_result/{osmid}"
+    final_output_dir.mkdir(parents=True, exist_ok=True)
+    
+    years_str = "_".join(map(str, processable_years))
+    bin_output_path = final_output_dir / f"binned_dataset_combined_{years_str}.geojson"
+    
+    combined_dataset_gdf.to_file(bin_output_path, driver="GeoJSON")
+    
+    print(f"\n✅ Dataset processing complete!")
+    print(f"   - Combined dataset: {len(combined_dataset_gdf):,} rows")
+    print(f"   - Years: {processable_years}")
+    print(f"   - Tiles: {len(all_year_tile_groups)}")
+    print(f"   - Saved to: {bin_output_path}")
+    
+    return combined_dataset_gdf, all_year_tile_groups, combined_original_dataset, bin_output_path
+

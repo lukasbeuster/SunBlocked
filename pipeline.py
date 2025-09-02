@@ -13,7 +13,7 @@ sys.path.append(str(Path(__file__).parent / 'src'))
 from solar import check_coverage, download_data
 from segmentation import run_segmentation
 from raster import raster_processing_main
-from processing import run_shade_processing
+from processing import run_shade_processing, process_dataset_only, run_shade_simulations_only, extract_and_merge_shade_values_only, reconstruct_tile_grouped_days, process_full_dataset_combined
 
 # --- Helper Functions for State Management ---
 
@@ -314,13 +314,340 @@ def process_shade(config):
         # Add a placeholder for your final output path in config if needed
         final_output_dir = output_dir / f"step6_final_result/{osmid}"
         final_output_dir.mkdir(parents=True, exist_ok=True)
-        final_output_path = final_output_dir / "shaded_dataset_testing.geojson"
+        final_output_path = final_output_dir / "shaded_dataset.geojson"
 
         final_dataset.to_file(final_output_path, driver="GeoJSON")
         click.secho(f"\n✅ Pipeline complete! Final output saved to: {final_output_path}", fg='green')
     else:
         click.secho("\n❌ No data was processed. No output file created.", fg='red')
 
+# --- NEW SPLIT PIPELINE STEPS ---
+
+# --- STEP 5a: Dataset Processing and Binning ---
+
+@cli.command(name="process-dataset")
+@click.option("--config", default="config.yaml", type=click.Path(exists=True), help="Path to the configuration file.")
+@click.option("--year", type=int, help="Specific year to process (optional)")
+def process_dataset_step(config, year):
+    """STEP 5a: Process and bin the dataset for shade simulation."""
+    cfg = load_config(config)
+    output_dir = Path(cfg["output_dir"])
+    run_info = load_run_info(output_dir)
+    osmid = run_info.get("osmid")
+    if not osmid:
+        click.secho("Error: osmid not found. Please run the previous steps first.", fg="red")
+        return
+
+    click.echo(f"--- Running Step 5a: Dataset Processing for Run ID: {osmid} ---")
+
+    # Load dataset flexibly based on file format
+    dataset = load_dataset_flexibly(cfg)
+    timestamp_col = cfg["columns"]["timestamp"]
+    dataset[timestamp_col] = pd.to_datetime(dataset[timestamp_col], errors="coerce")
+    
+    n_invalid = dataset[timestamp_col].isna().sum()
+    print(f"{n_invalid} rows failed to parse timestamps and became NaT")
+    dataset = dataset.dropna(subset=[timestamp_col])
+
+    # Process each year
+    years_to_process = [year] if year else [int(y) for y in cfg["year_configs"].keys()]
+    
+    for proc_year in years_to_process:
+        click.echo(f"-> Processing data for year {proc_year}...")
+        year_data = dataset[dataset[timestamp_col].dt.year == proc_year].copy()
+        
+        if year_data.empty:
+            click.secho(f"  No data found for year {proc_year}, skipping.", fg="yellow")
+            continue
+            
+        try:
+            dataset_gdf, tile_grouped_days, original_dataset, bin_output_path = process_dataset_only(
+                year_data, proc_year, osmid, cfg
+            )
+            
+            # Save processing metadata to run_info
+            save_run_info(output_dir, {
+                f"binned_dataset_{proc_year}": str(bin_output_path),
+                f"dataset_processed_{proc_year}": True
+            })
+            
+        except Exception as e:
+            click.secho(f"❌ Error processing year {proc_year}: {e}", fg="red")
+            continue
+    
+    click.secho("\n✅ Dataset processing complete!", fg="green")
+
+# --- STEP 6: Shade Simulation ---
+
+@cli.command(name="simulate-shade")
+@click.option("--config", default="config.yaml", type=click.Path(exists=True), help="Path to the configuration file.")
+@click.option("--year", type=int, help="Specific year to simulate (optional)")
+def simulate_shade_step(config, year):
+    """STEP 6: Run computationally intensive shade simulations."""
+    cfg = load_config(config)
+    output_dir = Path(cfg["output_dir"])
+    run_info = load_run_info(output_dir)
+    osmid = run_info.get("osmid")
+    if not osmid:
+        click.secho("Error: osmid not found. Please run the previous steps first.", fg="red")
+        return
+
+    click.echo(f"--- Running Step 6: Shade Simulations for Run ID: {osmid} ---")
+
+    # Determine years to process
+    years_to_process = [year] if year else [int(y) for y in cfg["year_configs"].keys()]
+    
+    for proc_year in years_to_process:
+        # Check if dataset was processed for this year
+        if not run_info.get(f"dataset_processed_{proc_year}"):
+            click.secho(f"Warning: Dataset not processed for year {proc_year}. Run process-dataset first.", fg="yellow")
+            continue
+            
+        # Load the binned dataset
+        binned_path = run_info.get(f"binned_dataset_{proc_year}")
+        if not binned_path or not Path(binned_path).exists():
+            click.secho(f"Error: Binned dataset not found for year {proc_year}", fg="red")
+            continue
+            
+        click.echo(f"-> Loading binned dataset for year {proc_year}...")
+        dataset_gdf = gpd.read_file(binned_path)
+        
+        # Reconstruct tile_grouped_days from the binned dataset
+        # This requires recreating the grouping structure
+        click.echo(f"-> Reconstructing tile groupings for simulations...")
+        tile_grouped_days = reconstruct_tile_grouped_days(dataset_gdf)
+        
+        try:
+            run_shade_simulations_only(tile_grouped_days, dataset_gdf, osmid, proc_year, cfg)
+            
+            # Save simulation completion status
+            save_run_info(output_dir, {
+                f"simulations_complete_{proc_year}": True
+            })
+            
+        except Exception as e:
+            click.secho(f"❌ Error simulating shade for year {proc_year}: {e}", fg="red")
+            continue
+    
+    click.secho("\n✅ Shade simulations complete!", fg="green")
+
+# --- STEP 7: Extract and Merge Shade Values ---
+
+@cli.command(name="extract-shade")
+@click.option("--config", default="config.yaml", type=click.Path(exists=True), help="Path to the configuration file.")
+def extract_shade_step(config):
+    """STEP 7: Extract shade values from rasters and merge with dataset."""
+    cfg = load_config(config)
+    output_dir = Path(cfg["output_dir"])
+    run_info = load_run_info(output_dir)
+    osmid = run_info.get("osmid")
+    if not osmid:
+        click.secho("Error: osmid not found. Please run the previous steps first.", fg="red")
+        return
+
+    click.echo(f"--- Running Step 7: Shade Extraction for Run ID: {osmid} ---")
+
+    all_year_results = []
+    
+    for year_str in cfg["year_configs"].keys():
+        proc_year = int(year_str)
+        
+        # Check if simulations were completed for this year
+        if not run_info.get(f"simulations_complete_{proc_year}"):
+            click.secho(f"Warning: Simulations not complete for year {proc_year}. Run simulate-shade first.", fg="yellow")
+            continue
+            
+        # Load the binned dataset and original dataset
+        binned_path = run_info.get(f"binned_dataset_{proc_year}")
+        if not binned_path or not Path(binned_path).exists():
+            click.secho(f"Error: Binned dataset not found for year {proc_year}", fg="red")
+            continue
+            
+        click.echo(f"-> Processing shade extraction for year {proc_year}...")
+        dataset_gdf = gpd.read_file(binned_path)
+        
+        # For this step, we need the original dataset too - reconstruct from binned data
+        # or load separately if available
+        original_dataset = dataset_gdf  # Simplified for now
+        
+        try:
+            dataset_final = extract_and_merge_shade_values_only(
+                dataset_gdf, osmid, cfg, original_dataset
+            )
+            all_year_results.append(dataset_final)
+            
+        except Exception as e:
+            click.secho(f"❌ Error extracting shade for year {proc_year}: {e}", fg="red")
+            continue
+    
+    # Combine and save final result
+    if all_year_results:
+        final_dataset = pd.concat(all_year_results, ignore_index=True)
+        final_dataset = gpd.GeoDataFrame(final_dataset, geometry="geometry")
+        
+        final_output_dir = output_dir / f"step6_final_result/{osmid}"
+        final_output_dir.mkdir(parents=True, exist_ok=True)
+        final_output_path = final_output_dir / "shaded_dataset.geojson"
+        
+        final_dataset.to_file(final_output_path, driver="GeoJSON")
+        click.secho(f"\n✅ Shade extraction complete! Final output: {final_output_path}", fg="green")
+    else:
+        click.secho("\n❌ No data was processed. No output file created.", fg="red")
+
+
+
+
+# =============================================================================
+# SPLIT PIPELINE STEPS
+# =============================================================================
+
+# --- STEP 5: Dataset Processing and Binning ---
+
+@cli.command(name='process-dataset')
+@click.option('--config', default='config.yaml', type=click.Path(exists=True), help='Path to the configuration file.')
+def process_dataset_step(config):
+    """STEP 5: Process and bin the dataset for shade simulation."""
+    cfg = load_config(config)
+    output_dir = Path(cfg['output_dir'])
+    run_info = load_run_info(output_dir)
+    osmid = run_info.get('osmid')
+    if not osmid:
+        click.secho("Error: 'osmid' not found. Please run the previous steps first.", fg='red')
+        return
+
+    click.echo(f"--- Running Step 5: Dataset Processing for Run ID: {osmid} ---")
+
+    # Load dataset flexibly based on file format
+    dataset = load_dataset_flexibly(cfg)
+    
+    try:
+        combined_dataset_gdf, combined_tile_grouped_days, combined_original_dataset, bin_output_path = process_full_dataset_combined(
+            dataset, osmid, cfg
+        )
+        
+        if combined_dataset_gdf is None:
+            click.secho("❌ No processable data found", fg='red')
+            return
+        
+        # Save processing metadata to run_info
+        save_run_info(output_dir, {
+            'binned_dataset_combined': str(bin_output_path),
+            'dataset_processed': True,
+            'processed_years': list(combined_dataset_gdf['time'].dt.year.unique()) if 'time' in combined_dataset_gdf.columns else ['unknown']
+        })
+        
+        click.secho(f"\n✅ Dataset processing complete! Output: {bin_output_path}", fg='green')
+        
+    except Exception as e:
+        click.secho(f"❌ Error processing dataset: {e}", fg='red')
+
+# --- STEP 6: Shade Simulation ---
+
+@cli.command(name='simulate-shade')
+@click.option('--config', default='config.yaml', type=click.Path(exists=True), help='Path to the configuration file.')
+def simulate_shade_step(config):
+    """STEP 6: Run computationally intensive shade simulations."""
+    cfg = load_config(config)
+    output_dir = Path(cfg['output_dir'])
+    run_info = load_run_info(output_dir)
+    osmid = run_info.get('osmid')
+    if not osmid:
+        click.secho("Error: 'osmid' not found. Please run the previous steps first.", fg='red')
+        return
+
+    click.echo(f"--- Running Step 6: Shade Simulations for Run ID: {osmid} ---")
+
+    # Check if dataset was processed
+    if not run_info.get('dataset_processed'):
+        click.secho("Warning: Dataset not processed. Run process-dataset first.", fg='yellow')
+        return
+        
+    # Load the combined binned dataset
+    binned_path = run_info.get('binned_dataset_combined')
+    if not binned_path or not Path(binned_path).exists():
+        click.secho("Error: Combined binned dataset not found", fg='red')
+        return
+        
+    click.echo(f"-> Loading combined binned dataset...")
+    dataset_gdf = gpd.read_file(binned_path)
+    
+    # Reconstruct tile groupings for simulations
+    click.echo(f"-> Reconstructing tile groupings...")
+    tile_grouped_days = reconstruct_tile_grouped_days(dataset_gdf)
+    
+    try:
+        # Run simulations for all years present in the data
+        processed_years = run_info.get('processed_years', [2024])  # Default to 2024
+        for year in processed_years:
+            click.echo(f"-> Running simulations for year {year}...")
+            run_shade_simulations_only(tile_grouped_days, dataset_gdf, osmid, year, cfg)
+        
+        # Save simulation completion status
+        save_run_info(output_dir, {
+            'simulations_complete': True
+        })
+        
+        click.secho("\n✅ Shade simulations complete!", fg='green')
+        
+    except Exception as e:
+        click.secho(f"❌ Error during simulations: {e}", fg='red')
+
+# --- STEP 7: Extract and Merge Shade Values ---
+
+@cli.command(name='extract-shade')
+@click.option('--config', default='config.yaml', type=click.Path(exists=True), help='Path to the configuration file.')
+def extract_shade_step(config):
+    """STEP 7: Extract shade values from rasters and merge with dataset."""
+    cfg = load_config(config)
+    output_dir = Path(cfg['output_dir'])
+    run_info = load_run_info(output_dir)
+    osmid = run_info.get('osmid')
+    if not osmid:
+        click.secho("Error: 'osmid' not found. Please run the previous steps first.", fg='red')
+        return
+
+    click.echo(f"--- Running Step 7: Shade Extraction for Run ID: {osmid} ---")
+
+    # Check if simulations were completed
+    if not run_info.get('simulations_complete'):
+        click.secho("Warning: Simulations not complete. Run simulate-shade first.", fg='yellow')
+        return
+        
+    # Load the combined binned dataset
+    binned_path = run_info.get('binned_dataset_combined')
+    if not binned_path or not Path(binned_path).exists():
+        click.secho("Error: Combined binned dataset not found", fg='red')
+        return
+        
+    click.echo(f"-> Loading combined dataset for extraction...")
+    dataset_gdf = gpd.read_file(binned_path)
+    original_dataset = dataset_gdf.copy()  # Use the same dataset as original for aggregation
+    
+    try:
+        final_result = extract_and_merge_shade_values_only(dataset_gdf, osmid, cfg, original_dataset)
+        
+        # Save final result
+        final_output_dir = output_dir / f"step6_final_result/{osmid}"
+        final_output_dir.mkdir(parents=True, exist_ok=True)
+        final_output_path = final_output_dir / "shaded_dataset_split.geojson"
+        
+        final_result.to_file(final_output_path, driver="GeoJSON")
+        
+        # Update run_info
+        save_run_info(output_dir, {
+            'final_shaded_dataset': str(final_output_path),
+            'extraction_complete': True
+        })
+        
+        click.secho(f"\n✅ Shade extraction complete! Final output: {final_output_path}", fg='green')
+        
+        # Show summary stats
+        shade_cols = [col for col in final_result.columns if 'shade' in col.lower()]
+        click.echo(f"   - Final dataset: {len(final_result):,} rows")
+        click.echo(f"   - Shade columns: {len(shade_cols)}")
+        
+    except Exception as e:
+        click.secho(f"❌ Error during extraction: {e}", fg='red')
 
 # --- Convenience Command to Run All Steps ---
 
