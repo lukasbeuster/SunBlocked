@@ -4,8 +4,8 @@
 
 # === 1. Input and Output Paths ===
 # Path to the input dataset (GeoJSON, GPKG, Shapefile or CSV)
-dataset_path: "data/raw_data/breeze/thermal_drift_data/bos/back_bay_exclusive_trackpoints.parquet"
-
+dataset_path: "data/clean_data/strava/back_bay_points_hours_all_months.parquet"
+# dataset_path: "data/clean_data/strava/back_bay_points_hours.parquet"
 # Base directory for all generated outputs.
 # The pipeline will create sub-folders inside this directory for each step.
 output_dir: "results/output"
@@ -16,14 +16,14 @@ columns:
   latitude: "latitude"
   longitude: "longitude"
   timestamp: "time"
-  unique_id: "tripUuid"
+  unique_id: "sample_id"
 
 # === 3. Dependency Paths ===
 # Paths to pre-downloaded resources required by the pipeline.
 dependencies:
   solar_coverage_medium: "data/clean_data/solar-api-coverage-exp/SolarAPIMediumArea.shp"
   solar_coverage_high: "data/clean_data/solar-api-coverage-exp/SolarAPIHighArea.shp"
-  sam_checkpoint: "data/sam_vit_h_4b8939.pth"
+  sam_checkpoint: "data/clean_data/sam/sam_vit_h_4b8939.pth"
 
 # === 4. Seasonal & Timezone Parameters ===
 seasons:
@@ -45,9 +45,9 @@ year_configs:
     dst_start: "2014-03-30"
     dst_end: "2014-10-26"
   2015:
-  solstice_day: "2015-06-21"
-  dst_start: "2015-03-29"
-  dst_end: "2015-10-25"
+    solstice_day: "2015-06-21"
+    dst_start: "2015-03-29"
+    dst_end: "2015-10-25"
   2021:
     solstice_day: "2021-06-21"
     dst_start: "2021-03-28"
@@ -56,20 +56,24 @@ year_configs:
     solstice_day: "2022-06-21"
     dst_start: "2022-03-27"
     dst_end: "2022-10-30"
+  2024:
+    solstice_day: "2024-06-21"
+    dst_start: "2024-03-10"
+    dst_end: "2024-11-03"
 
 # === 5. Shade Simulation Parameters - OPTIONAL ===
 simulation:
   # Interval in minutes for the shade simulation.
-  shade_interval_minutes: 30
+  shade_interval_minutes: 60
   # Input if you want to simulate shade ONLY from buildings
   building_shade: True
   # Input if you want to simulate shade from both buildings and trees
   combined_shade: True
   # Time to start simulation ('HH:MM' format). Use 'None' to start from sunrise.
-  start_time: None
+  start_time: "None"
   # If you want to bin data based on timestamp, enter an integer bin size > 1. 0 to disable.
   # Binning is explained in the README.
-  bin_size: 0
+  bin_size: 7
   # Choose if you want solstice to always be simulated even if not in bin. More about this in README.
   simulate_solstice: True
   # Buffer values (in meters) to calculate shade around each point.
@@ -82,7 +86,7 @@ solar_api:
   min_points_per_tile: 1
 
 # Define maximum number of workers in parallel processing
-max_workers: 32
+max_workers: 4
 
 # Choose what parameters you would like the model to output. Definitions in README.
 extra_outputs:
@@ -90,7 +94,7 @@ extra_outputs:
   tree_shade_step: True
   bldg_shadow_fraction: True
   tree_shadow_fraction: True
-  hours_before: [2]
+  hours_before: [2, 4]
 
 # === 7. Results ===
 # Save output dataset with shade results?
