@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 import geopandas as gpd
 import pandas as pd
+import numpy as np
 from datetime import datetime
 
 # This makes sure Python can find your 'src' directory
@@ -14,6 +15,18 @@ from solar import check_coverage, download_data
 from segmentation import run_segmentation
 from raster import raster_processing_main
 from processing import run_shade_processing, process_dataset_only, run_shade_simulations_only, extract_and_merge_shade_values_only, reconstruct_tile_grouped_days, process_full_dataset_combined
+
+
+# --- JSON Encoder for Numpy Types ---
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
 
 # --- Helper Functions for State Management ---
 
@@ -47,7 +60,7 @@ def save_run_info(output_dir: Path, data: dict, fresh_start: bool = False):
 
     existing_data.update(data)
     with open(run_info_path, 'w') as f:
-        json.dump(existing_data, f, indent=4)
+        json.dump(existing_data, f, indent=4, cls=NumpyEncoder)
 
 # --- Run Management Utilities ---
 from typing import List
