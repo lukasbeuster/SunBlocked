@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import re
 import glob
 import importlib
@@ -18,20 +19,106 @@ from shapely.geometry import box
 import concurrent.futures
 import gc
 from concurrent.futures import as_completed
-from pathlib import Path
-import json
 from functools import lru_cache
 
+# === OPTIMIZATION: Helper functions for efficient processing ===
+def build_raster_index(osmid: str, config: dict) -> dict:
+    """
+    Scan step4 raster directory once and cache building/canopy raster paths per tile.
+    Returns a dict: {tile_id: {"building": path, "canopy": path_or_None}}
+    """
+    from pathlib import Path
+    processing_dir = Path(config["output_dir"]) / f"step4_raster_processing/{osmid}"
+    index = {}
 
-importlib.reload(shade)
+    # Find all building rasters
+    for bldg_path in glob.glob(str(processing_dir / "*building_dsm.tif")):
+        name = Path(bldg_path).name
+        # Extract tile_id from pattern: osmid_tile_id_date_building_dsm.tif
+        # e.g., "bb2eafb8_p_0_2022_07_01_building_dsm.tif" => tile_id = "p_0"
+        parts = name.replace("_building_dsm.tif", "").split("_")
+        if len(parts) >= 3:
+            tile_id = "_".join(parts[1:3])  # e.g., "p_0" from "bb2eafb8_p_0_2022_07_01"
+        else:
+            continue
 
-import warnings
-# Suppress pandas FutureWarning about DataFrame concatenation with empty or all-NA entries
-warnings.filterwarnings("ignore", category=FutureWarning, message=".*DataFrame concatenation with empty or all-NA entries.*")
+        # Try to find corresponding canopy raster
+        canopy_candidate = bldg_path.replace("building_dsm.tif", "canopy_dsm.tif")
+        canopy_path = canopy_candidate if Path(canopy_candidate).exists() else None
 
+        # Only store unique tile_ids (avoid duplicates from different dates)
+        if tile_id not in index:
+            index[tile_id] = {
+                "building": bldg_path,
+                "canopy": canopy_path,
+            }
 
+    return index
 
-# Wrapper function for multiprocessing (cannot use lambda with ProcessPoolExecutor)
+def should_skip_simulation(osmid: str, tile_id: str, sim_date, config: dict) -> bool:
+    """
+    Check if simulation outputs already exist for this tile and date.
+    Returns True if we should skip this simulation.
+    """
+    from pathlib import Path
+    output_dir = Path(config["output_dir"])
+    shade_dir = output_dir / f"step5_shade_results/{osmid}"
+    
+    # Check for both building and combined shade outputs
+    building_out = shade_dir / "building_shade" / f"{tile_id}_{sim_date}_building_shade.tif"
+    combined_out = shade_dir / "combined_shade" / f"{tile_id}_{sim_date}_combined_shade.tif"
+    
+    return building_out.exists() and combined_out.exists()
+
+def reconstruct_tile_grouped_days_from_parquet(tiles_dir: str, tile_id: str) -> dict:
+    """
+    Load tile metadata from parquet and reconstruct tile_grouped_days for a single tile.
+    Returns a dict mapping each binned_date (date) to [final_stamp, intervals], where:
+      - final_stamp is a datetime on the binned_date day at the latest hour observed
+      - intervals is a list of intermediate datetimes on the same binned_date (can be empty)
+
+    Note: We intentionally remap all rounded_timestamp values to the binned_date day,
+    preserving only their time-of-day, so simulations run on the canonical binned date.
+    """
+    from pathlib import Path
+    import pandas as pd
+    from collections import defaultdict
+    from datetime import datetime
+
+    tile_dir = Path(tiles_dir) / f"tile_{tile_id}"
+    meta_path = tile_dir / "meta.parquet"
+
+    if not meta_path.exists():
+        return {}
+
+    # Load minimal metadata for this tile
+    tile_df = pd.read_parquet(meta_path)
+
+    # Ensure proper dtypes
+    tile_df["binned_date"] = pd.to_datetime(tile_df["binned_date"]).dt.date
+    rt = pd.to_datetime(tile_df["rounded_timestamp"]).dt.time
+    tile_df = tile_df.assign(_rt_time=rt)
+
+    tile_grouped_days = {}
+
+    for binned_date, group_df in tile_df.groupby("binned_date"):
+        # Unique times-of-day for this binned_date
+        unique_times = sorted(group_df["_rt_time"].unique())
+        if not unique_times:
+            continue
+
+        # Build datetimes on the binned_date for each unique time
+        mapped_datetimes = [datetime.combine(binned_date, t) for t in unique_times]
+        mapped_datetimes.sort()
+
+        # Final stamp is the latest time on the binned_date
+        final_stamp = mapped_datetimes[-1]
+        intervals = mapped_datetimes[:-1]
+
+        tile_grouped_days[binned_date] = [final_stamp, intervals]
+
+    return tile_grouped_days
+
 def _process_dataset_subset(args):
     """Wrapper function to process a dataset subset for multiprocessing."""
     subset, osmid, binned, config = args
@@ -225,6 +312,7 @@ def run_shade_simulations(tile_grouped_days, dataset_gdf, osmid, year, config):
     with concurrent.futures.ProcessPoolExecutor(max_workers=config['max_workers']) as executor:
         total_subsets = sum(len(dates) for dates in tile_grouped_days.values())  # Count total subsets for progress
         print("Processing {} data subsets with {} workers...".format(total_subsets, config['max_workers']))
+        futures = []  # Track all futures
         for tile_id, dates in tile_grouped_days.items():
             tile_dataset = dataset_gdf[dataset_gdf['tile_number'] == tile_id]
             for sim_date, timestamps in dates.items():
@@ -233,11 +321,20 @@ def run_shade_simulations(tile_grouped_days, dataset_gdf, osmid, year, config):
                     season = subset["season"].values[0]
                     params = summer_params if season == 1 else winter_params
                     # SHADE
-                    executor.submit(main_shade, osmid, tile_id, timestamps, sim_date, params, config)
+                    future = executor.submit(main_shade, osmid, tile_id, timestamps, sim_date, params, config)
+                    futures.append(future)
                 elif sim_date == datetime.fromisoformat(config['year_configs'][year]['solstice_day']).date():
-                    executor.submit(main_shade, osmid, tile_id, [None, []], sim_date, summer_params, config)
+                    future = executor.submit(main_shade, osmid, tile_id, [None, []], sim_date, summer_params, config)
+                    futures.append(future)
                 else:
                     raise ValueError(f"No data available for the day: {sim_date}")
+        
+        # Wait for all futures to complete
+        for future in futures:
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Warning: Shade simulation failed: {e}")
 
 def extract_and_merge_shade_values(dataset_gdf, osmid, binned, config):
     """
@@ -525,14 +622,13 @@ def shade_processing(bldg_path, matched_chm_path, osmid, date, timestamps, start
             transmissivity=inputs['tree_transmissivity']
         )
 
+    # timestamps structure: [final_stamp, intervals]
     final_stamp, intervals = timestamps[0], timestamps[1]
 
-    if final_stamp is not None:
-        date = final_stamp
-        all_intervals = intervals + [final_stamp]
-    else:
-        date = datetime.combine(date, datetime.min.time()).replace(hour=23, minute=59, second=59)
-        all_intervals = intervals
+    # Keep the simulation date anchored to the provided date parameter (which comes from sim_date).
+    # Do not overwrite it with final_stamp (which is only used to define end time).
+    # Note: 'date' is already the correct date parameter passed from main_shade
+    all_intervals = (intervals or []) + ([final_stamp] if final_stamp is not None else [])
 
     if not all_intervals:
         all_intervals = False
@@ -1886,6 +1982,29 @@ def process_full_dataset_combined(dataset, osmid, config):
     years_str = "_".join(map(str, processable_years))
     bin_output_path = final_output_dir / f"binned_dataset_combined_{years_str}.geojson"
     
+    # === OPTIMIZATION: Export per-tile metadata for efficient simulate-shade processing ===
+    tiles_dir = final_output_dir / "tiles"
+    tiles_dir.mkdir(exist_ok=True)
+    
+    # Only export minimal columns needed for simulation
+    sim_columns = ["tile_number", "binned_date", "rounded_timestamp", "season"]
+    sim_meta_df = combined_dataset_gdf[sim_columns].copy()
+    
+    tile_count = sim_meta_df["tile_number"].nunique()
+    print(f"📦 Exporting per-tile metadata for {tile_count} tiles...")
+    
+    # Export per-tile Parquet files
+    for tile_id, tile_df in sim_meta_df.groupby("tile_number"):
+        tile_dir = tiles_dir / f"tile_{tile_id}"
+        tile_dir.mkdir(exist_ok=True)
+        tile_meta_path = tile_dir / "meta.parquet"
+        
+        # Drop the tile_number column since its redundant in per-tile files
+        tile_meta = tile_df.drop(columns=["tile_number"])
+        tile_meta.to_parquet(tile_meta_path, index=False)
+    
+    print(f"   ✅ Per-tile metadata saved to: {tiles_dir}")
+
     combined_dataset_gdf.to_file(bin_output_path, driver="GeoJSON")
     
     print(f"\n✅ Dataset processing complete!")
@@ -1896,3 +2015,76 @@ def process_full_dataset_combined(dataset, osmid, config):
     
     return combined_dataset_gdf, all_year_tile_groups, combined_original_dataset, bin_output_path
 
+
+def process_single_tile_for_simulation(tile_id, tiles_dir_str, osmid, processed_years, config_dict):
+    """
+    Process a single tile with all its dates. This function will be called in parallel.
+    Each call will use run_shade_simulations_only which has its own ProcessPoolExecutor for dates.
+    """
+    results = {
+        'tile_id': tile_id,
+        'simulated_dates': 0,
+        'skipped_dates': 0,
+        'error': None
+    }
+    
+    try:
+        # Load minimal metadata for this tile only  
+        tile_grouped_days = reconstruct_tile_grouped_days_from_parquet(tiles_dir_str, tile_id)
+        
+        if not tile_grouped_days:
+            results['error'] = f"No simulation dates found for tile {tile_id}"
+            return results
+        
+        # Create a minimal dataset_gdf with just the season info needed
+        # Load season from the parquet metadata
+        from pathlib import Path
+        import pandas as pd
+        
+        tile_dir = Path(tiles_dir_str) / f"tile_{tile_id}"
+        meta_path = tile_dir / "meta.parquet"
+        tile_meta = pd.read_parquet(meta_path)
+        
+        # Create a dummy GeoDataFrame with the required columns for run_shade_simulations_only
+        # We need: tile_number, binned_date, season columns
+        dummy_gdf = tile_meta.copy()
+        dummy_gdf['tile_number'] = tile_id
+        
+        # Convert to GeoDataFrame (required by run_shade_simulations_only)
+        import geopandas as gpd
+        from shapely.geometry import Point
+        dummy_gdf['geometry'] = Point(0, 0)  # Dummy geometry
+        dummy_gdf = gpd.GeoDataFrame(dummy_gdf)
+        
+        # Count dates before processing
+        total_dates = len(tile_grouped_days)
+        skipped_count = 0
+        
+        # Filter out dates that already exist
+        filtered_tile_grouped_days = {}
+        for sim_date, timestamps in tile_grouped_days.items():
+            if should_skip_simulation(osmid, tile_id, sim_date, config_dict):
+                skipped_count += 1
+            else:
+                filtered_tile_grouped_days[sim_date] = timestamps
+        
+        results['skipped_dates'] = skipped_count
+        
+        if not filtered_tile_grouped_days:
+            results['error'] = f"All simulations for tile {tile_id} already exist"
+            return results
+        
+        # Use the original multiprocessing simulation for this tile's dates
+        # This will create its own ProcessPoolExecutor for the dates within this tile
+        for year in processed_years:
+            # Create a tile-only grouped days dict
+            tile_only_grouped = {tile_id: filtered_tile_grouped_days}
+            run_shade_simulations_only(tile_only_grouped, dummy_gdf, osmid, year, config_dict)
+        
+        results['simulated_dates'] = len(filtered_tile_grouped_days)
+        
+    except Exception as e:
+        import traceback
+        results['error'] = f"{str(e)}\n{traceback.format_exc()}"
+    
+    return results

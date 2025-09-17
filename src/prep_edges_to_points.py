@@ -2,6 +2,7 @@ import pandas as pd
 import geopandas as gpd
 import numpy as np
 from pathlib import Path
+import argparse
 
 def densify_lines_to_points(gdf_lines, spacing_m=10, edge_id_col="edge_uid"):
     # Work in metric CRS for distances
@@ -117,19 +118,33 @@ def analyze_hours(hours: pd.DataFrame, label="hours"):
     print("===== END ANALYZE =====\n")
 
 def main():
+    parser = argparse.ArgumentParser(description='Process edges to points with optional AOI filtering')
+    parser.add_argument('--filter-aoi', action='store_true', 
+                       help='Filter to Back Bay AOI (default: process all edges)')
+    parser.add_argument('--aoi-poly', type=str, default="../data/raw_data/bos/back_bay.json",
+                       help='Path to AOI polygon file')
+    
+    args = parser.parse_args()
+    
     # ---- EDIT THESE INPUTS ----
     edges_path = "../data/clean_data/strava/data_to_share/all_edges_hourly_2024-04-01-2024-04-30_ped_boston_filtered/53f3ef7e32738022bd45a2ed224bcbcf8cb63f07dc3d5bca7e9221dfe7fe4451-1738340934480.shp"            # LineStrings with edgeUID
-    back_bay_poly = "../data/raw_data/bos/back_bay.json"            # Optional AOI
     hour_csvs = [
         "../data/clean_data/strava/data_to_share/all_edges_hourly_2024-04-01-2024-04-30_ped_boston_filtered/53f3ef7e32738022bd45a2ed224bcbcf8cb63f07dc3d5bca7e9221dfe7fe4451-1738340934480.csv",
         "../data/clean_data/strava/data_to_share/all_edges_hourly_2024-06-01-2024-06-30_ped_boston_filtered/2496bcdb5fd9d0ae571ecbe8bc16ecbbad2ebc9cab61ae94449698ef39e41cf4-1738340261837.csv",
         "../data/clean_data/strava/data_to_share/all_edges_hourly_2024-10-01-2024-10-31_ped_boston_filtered/5ea6147519dc3a820312867430fec9067a1eb42846d1ac03f5446f461b85c5b0-1738340998655.csv",
         "../data/clean_data/strava/data_to_share/all_edges_hourly_2024-12-01-2024-12-31_ped_boston_filtered/66feca840e0c280c5bd400436507918bbd27a19acd14e99d5bc00d0b4b144e9e-1738340241545.csv",
     ]
-    spacing_m = 10
-    prepared_out = Path("../data/clean_data/strava/back_bay_points_hours_all_months.parquet")
+    spacing_m = 25
+    
+    # Output filename changes based on filtering
+    if args.filter_aoi:
+        prepared_out = Path("../data/clean_data/strava/back_bay_points_hours_all_months.parquet")
+        output_prefix = "back_bay"
+    else:
+        prepared_out = Path("../data/clean_data/strava/boston_full_points_hours_all_months.parquet")
+        output_prefix = "boston_full"
 
-    # 1) Load edges, clip to Back Bay
+    # 1) Load edges
     edges = gpd.read_file(edges_path)
     print(f"Loaded edges: {len(edges):,} features; CRS={edges.crs}")
     # Check for edgeUID column and rename it to edge_uid for consistency with CSV files
@@ -138,16 +153,22 @@ def main():
     edges = edges.rename(columns={"edgeUID": "edge_uid"})
     print("Edge columns:", list(edges.columns))
     
-    poly = gpd.read_file(back_bay_poly)
-    if poly.crs != edges.crs:
-        poly = poly.to_crs(edges.crs)
-    edges_aoi = gpd.clip(edges, poly.union_all())
-    print(f"AOI polygon crs={poly.crs}; edges in AOI: {len(edges_aoi):,}")
-
-    # Export AOI edges for further analysis
-    edges_out = Path("../data/clean_data/strava/back_bay_edges_aoi.geojson")
-    edges_aoi.to_file(edges_out, driver="GeoJSON")
-    print(f"Exported AOI edges to {edges_out} ({len(edges_aoi):,} features)")
+    # Apply AOI filtering if requested
+    if args.filter_aoi:
+        print(f"Applying AOI filtering using {args.aoi_poly}")
+        poly = gpd.read_file(args.aoi_poly)
+        if poly.crs != edges.crs:
+            poly = poly.to_crs(edges.crs)
+        edges_filtered = gpd.clip(edges, poly.union_all())
+        print(f"AOI polygon crs={poly.crs}; edges in AOI: {len(edges_filtered):,}")
+        
+        # Export AOI edges for further analysis
+        edges_out = Path(f"../data/clean_data/strava/{output_prefix}_edges_aoi.geojson")
+        edges_filtered.to_file(edges_out, driver="GeoJSON")
+        print(f"Exported AOI edges to {edges_out} ({len(edges_filtered):,} features)")
+    else:
+        print("No AOI filtering applied - using all edges")
+        edges_filtered = edges.copy()
 
     # 2) Load hours (per edge)
     hours = load_hours_csvs(hour_csvs)
@@ -156,47 +177,47 @@ def main():
     analyze_hours(hours, label="hours AFTER drop_duplicates")
 
     # 3) Keep only edges that appear in hours
-    edges_aoi["edge_uid"] = edges_aoi["edge_uid"].astype(str)
-    target_edges = edges_aoi.merge(hours[["edge_uid"]].drop_duplicates(), on="edge_uid", how="inner")
-    print(f'After merging hours with AOI (Back Bay) edges: {len(target_edges)}')
+    edges_filtered["edge_uid"] = edges_filtered["edge_uid"].astype(str)
+    target_edges = edges_filtered.merge(hours[["edge_uid"]].drop_duplicates(), on="edge_uid", how="inner")
+    print(f'After merging hours with {"AOI (Back Bay)" if args.filter_aoi else "all Boston"} edges: {len(target_edges)}')
 
-    # Diagnostics & exports: AOI edges with vs without hours
+    # Diagnostics & exports: filtered edges with vs without hours
     with_hours = target_edges.copy()
-    without_hours = edges_aoi[~edges_aoi['edge_uid'].isin(with_hours['edge_uid'])].copy()
+    without_hours = edges_filtered[~edges_filtered['edge_uid'].isin(with_hours['edge_uid'])].copy()
 
-    print(f"AOI edges total: {len(edges_aoi):,}")
-    print(f"AOI edges WITH hours: {len(with_hours):,}")
-    print(f"AOI edges WITHOUT hours: {len(without_hours):,}")
+    print(f"Filtered edges total: {len(edges_filtered):,}")
+    print(f"Filtered edges WITH hours: {len(with_hours):,}")
+    print(f"Filtered edges WITHOUT hours: {len(without_hours):,}")
 
     # Quick sample of missing edge_uids for QA
     if len(without_hours) > 0:
-        print("Sample of AOI edges without hours (up to 10 edge_uids):")
+        print("Sample of filtered edges without hours (up to 10 edge_uids):")
         print(without_hours['edge_uid'].astype(str).head(10).to_list())
 
     # Export for inspection
-    edges_with_hours_out = Path("../data/clean_data/strava/back_bay_edges_with_hours.geojson")
-    edges_without_hours_out = Path("../data/clean_data/strava/back_bay_edges_no_hours.geojson")
+    edges_with_hours_out = Path(f"../data/clean_data/strava/{output_prefix}_edges_with_hours.geojson")
+    edges_without_hours_out = Path(f"../data/clean_data/strava/{output_prefix}_edges_no_hours.geojson")
 
     with_hours.to_file(edges_with_hours_out, driver="GeoJSON")
-    print(f"Exported AOI edges WITH hours to {edges_with_hours_out} ({len(with_hours):,} features)")
+    print(f"Exported filtered edges WITH hours to {edges_with_hours_out} ({len(with_hours):,} features)")
 
     if len(without_hours) > 0:
         without_hours.to_file(edges_without_hours_out, driver="GeoJSON")
-        print(f"Exported AOI edges WITHOUT hours to {edges_without_hours_out} ({len(without_hours):,} features)")
+        print(f"Exported filtered edges WITHOUT hours to {edges_without_hours_out} ({len(without_hours):,} features)")
     else:
-        print("No AOI edges without hours; skipping export.")
+        print("No filtered edges without hours; skipping export.")
 
-    # Build the expected (edge_uid, time) pairs for AOI edges
-    aoi_edge_uids = set(target_edges['edge_uid'].astype(str).unique())
+    # Build the expected (edge_uid, time) pairs for filtered edges
+    filtered_edge_uids = set(target_edges['edge_uid'].astype(str).unique())
     expected_pairs = (
-        hours.loc[hours['edge_uid'].astype(str).isin(aoi_edge_uids), ['edge_uid', 'time']]
+        hours.loc[hours['edge_uid'].astype(str).isin(filtered_edge_uids), ['edge_uid', 'time']]
              .drop_duplicates()
              .sort_values(['edge_uid', 'time'])
              .reset_index(drop=True)
     )
-    print(f"Expected (edge_uid, time) pairs within AOI: {len(expected_pairs):,}")
+    print(f"Expected (edge_uid, time) pairs within filtered area: {len(expected_pairs):,}")
 
-    # How many hours per edge on average (post-AOI merge)?
+    # How many hours per edge on average (post filtering merge)?
     hrs_per_edge = hours.groupby('edge_uid')['time'].nunique()
     merged_counts = hrs_per_edge.reindex(target_edges['edge_uid']).dropna()
     if not merged_counts.empty:
@@ -217,7 +238,7 @@ def main():
     df = pts.merge(hours, on="edge_uid", how="inner")
     print(f'Length of dataframe after merging hours to points: {len(df)}')
 
-    # === VERIFY: all times per edge_uid in AOI are present in df ===
+    # === VERIFY: all times per edge_uid in filtered area are present in df ===
     observed_pairs = (
         df[['edge_uid', 'time']]
           .drop_duplicates()
