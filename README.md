@@ -381,3 +381,40 @@ python pipeline.py extract-shade
 - **Corrected year processing**: Pipeline now uses actual years from data rather than all config years
 - **Improved geometry handling**: Better DataFrame/GeoDataFrame conversion in extraction pipeline
 
+
+## Shade Simulation
+
+### Overview
+The shade simulation step generates high-resolution shadow raster files for each tile and date combination. This is computationally intensive and typically the longest-running step in the pipeline.
+
+### Performance Characteristics
+- **Runtime**: 20-30 hours for 174 tiles on a 128-core system
+- **Output**: ~40,000+ .tif files (building and combined shade rasters)
+- **Resource Usage**: ~85% CPU utilization with optimal configuration
+- **Memory**: 500MB-1.3GB per worker process
+
+### Optimal Configuration
+```bash
+python3 pipeline.py simulate-shade --max-tile-workers 12
+```
+
+For systems with different specifications:
+- **128+ cores**: Use 12-16 tile workers
+- **64 cores**: Use 6-8 tile workers  
+- **32 cores**: Use 3-4 tile workers
+- **General rule**: ~1 worker per 8-10 cores, leaving headroom for system operations
+
+### Monitoring
+- **Progress**: Monitor log files and output file count
+- **System load**: Should stay below total core count
+- **Memory**: Each worker uses ~1GB, ensure sufficient RAM
+
+### Output Structure
+```
+results/output/step5_shade_results/{run_id}/
+├── building_shade/{tile_id}/     # Building-only shadows
+└── combined_shade/{tile_id}/     # Buildings + vegetation shadows
+```
+
+Files are named: `{run_id}_{tile_id}_shadow_fraction_on_{YYYYMMDD}_{HHMM}.tif`
+

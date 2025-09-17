@@ -14,7 +14,7 @@ sys.path.append(str(Path(__file__).parent / 'src'))
 from solar import check_coverage, download_data
 from segmentation import run_segmentation
 from raster import raster_processing_main
-from processing import run_shade_processing, process_dataset_only, run_shade_simulations_only, extract_and_merge_shade_values_only, reconstruct_tile_grouped_days, process_full_dataset_combined
+from processing import run_shade_processing, process_dataset_only, run_shade_simulations_only, extract_and_merge_shade_values_only, reconstruct_tile_grouped_days, process_full_dataset_combined, build_raster_index, should_skip_simulation, reconstruct_tile_grouped_days_from_parquet, process_single_tile_for_simulation
 
 
 # --- JSON Encoder for Numpy Types ---
@@ -392,59 +392,6 @@ def process_dataset_step(config, year):
 
 # --- STEP 6: Shade Simulation ---
 
-@cli.command(name="simulate-shade")
-@click.option("--config", default="config.yaml", type=click.Path(exists=True), help="Path to the configuration file.")
-@click.option("--year", type=int, help="Specific year to simulate (optional)")
-def simulate_shade_step(config, year):
-    """STEP 6: Run computationally intensive shade simulations."""
-    cfg = load_config(config)
-    output_dir = Path(cfg["output_dir"])
-    run_info = load_run_info(output_dir)
-    osmid = run_info.get("osmid")
-    if not osmid:
-        click.secho("Error: osmid not found. Please run the previous steps first.", fg="red")
-        return
-
-    click.echo(f"--- Running Step 6: Shade Simulations for Run ID: {osmid} ---")
-
-    # Determine years to process
-    years_to_process = [year] if year else [int(y) for y in cfg["year_configs"].keys()]
-    
-    for proc_year in years_to_process:
-        # Check if dataset was processed for this year
-        if not run_info.get(f"dataset_processed_{proc_year}"):
-            click.secho(f"Warning: Dataset not processed for year {proc_year}. Run process-dataset first.", fg="yellow")
-            continue
-            
-        # Load the binned dataset
-        binned_path = run_info.get(f"binned_dataset_{proc_year}")
-        if not binned_path or not Path(binned_path).exists():
-            click.secho(f"Error: Binned dataset not found for year {proc_year}", fg="red")
-            continue
-            
-        click.echo(f"-> Loading binned dataset for year {proc_year}...")
-        dataset_gdf = gpd.read_file(binned_path)
-        
-        # Reconstruct tile_grouped_days from the binned dataset
-        # This requires recreating the grouping structure
-        click.echo(f"-> Reconstructing tile groupings for simulations...")
-        tile_grouped_days = reconstruct_tile_grouped_days(dataset_gdf)
-        
-        try:
-            run_shade_simulations_only(tile_grouped_days, dataset_gdf, osmid, proc_year, cfg)
-            
-            # Save simulation completion status
-            save_run_info(output_dir, {
-                f"simulations_complete_{proc_year}": True
-            })
-            
-        except Exception as e:
-            click.secho(f"❌ Error simulating shade for year {proc_year}: {e}", fg="red")
-            continue
-    
-    click.secho("\n✅ Shade simulations complete!", fg="green")
-
-# --- STEP 7: Extract and Merge Shade Values ---
 
 @cli.command(name="extract-shade")
 @click.option("--config", default="config.yaml", type=click.Path(exists=True), help="Path to the configuration file.")
@@ -558,8 +505,10 @@ def process_dataset_step(config):
 
 @cli.command(name='simulate-shade')
 @click.option('--config', default='config.yaml', type=click.Path(exists=True), help='Path to the configuration file.')
-def simulate_shade_step(config):
-    """STEP 6: Run computationally intensive shade simulations."""
+@click.option('--tile', help='Process only specific tile (e.g., p_0). If not provided, processes all tiles.')
+@click.option('--max-tile-workers', type=int, default=2, help='Number of tiles to process in parallel (default: 2)')
+def simulate_shade_step(config, tile, max_tile_workers):
+    """STEP 6: Run computationally intensive shade simulations (OPTIMIZED)."""
     cfg = load_config(config)
     output_dir = Path(cfg['output_dir'])
     run_info = load_run_info(output_dir)
@@ -575,37 +524,337 @@ def simulate_shade_step(config):
         click.secho("Warning: Dataset not processed. Run process-dataset first.", fg='yellow')
         return
         
-    # Load the combined binned dataset
-    binned_path = run_info.get('binned_dataset_combined')
-    if not binned_path or not Path(binned_path).exists():
-        click.secho("Error: Combined binned dataset not found", fg='red')
+    # Look for per-tile metadata (optimization)
+    final_output_dir = output_dir / f"step6_final_result/{osmid}"
+    tiles_dir = final_output_dir / "tiles"
+    
+    if not tiles_dir.exists():
+        click.secho("Error: Per-tile metadata not found. Please re-run process-dataset to generate optimized metadata.", fg='red')
         return
-        
-    click.echo(f"-> Loading combined binned dataset...")
-    dataset_gdf = gpd.read_file(binned_path)
     
-    # Reconstruct tile groupings for simulations
-    click.echo(f"-> Reconstructing tile groupings...")
-    tile_grouped_days = reconstruct_tile_grouped_days(dataset_gdf)
+    # Build raster index once to avoid repeated file system calls
+    click.echo("-> Building raster index...")
+    raster_index = build_raster_index(osmid, cfg)
+    click.echo(f"   Found rasters for {len(raster_index)} tiles")
     
-    try:
-        # Run simulations for all years present in the data
-        processed_years = run_info.get('processed_years', [2024])  # Default to 2024
-        for year in processed_years:
-            click.echo(f"-> Running simulations for year {year}...")
-            run_shade_simulations_only(tile_grouped_days, dataset_gdf, osmid, year, cfg)
+    # Discover available tiles
+    if tile:
+        # Process single tile
+        available_tiles = [tile] if (tiles_dir / f"tile_{tile}").exists() else []
+        if not available_tiles:
+            click.secho(f"Error: Tile {tile} not found in metadata", fg='red')
+            return
+    else:
+        # Discover all tiles
+        available_tiles = [d.name.replace('tile_', '') for d in tiles_dir.iterdir() 
+                          if d.is_dir() and d.name.startswith('tile_')]
+    
+    # Filter tiles that have rasters
+    available_tiles = [t for t in available_tiles if t in raster_index]
+    
+    click.echo(f"-> Processing {len(available_tiles)} tiles with {max_tile_workers} parallel tile workers...")
+    processed_years = run_info.get('processed_years', [2024])
+    
+    # Process tiles in parallel using the module-level function
+    completed_tiles = 0
+    total_errors = 0
+    total_simulated = 0
+    total_skipped = 0
+    
+    # Use ProcessPoolExecutor to process multiple tiles in parallel
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+    with ProcessPoolExecutor(max_workers=max_tile_workers) as tile_executor:
+        # Submit all tile jobs
+        future_to_tile = {
+            tile_executor.submit(
+                process_single_tile_for_simulation, 
+                tile_id, 
+                str(tiles_dir), 
+                osmid, 
+                processed_years, 
+                cfg
+            ): tile_id 
+            for tile_id in available_tiles
+        }
         
-        # Save simulation completion status
-        save_run_info(output_dir, {
-            'simulations_complete': True
-        })
-        
-        click.secho("\n✅ Shade simulations complete!", fg='green')
-        
-    except Exception as e:
-        click.secho(f"❌ Error during simulations: {e}", fg='red')
+        # Process results as they complete
+        for future in as_completed(future_to_tile):
+            tile_id = future_to_tile[future]
+            try:
+                result = future.result()
+                if result['error']:
+                    click.echo(f"❌ Tile {tile_id}: {result['error']}")
+                    total_errors += 1
+                else:
+                    click.echo(f"✅ Tile {tile_id}: {result['simulated_dates']} simulated, {result['skipped_dates']} skipped")
+                    total_simulated += result['simulated_dates']
+                    total_skipped += result['skipped_dates']
+                    completed_tiles += 1
+            except Exception as e:
+                click.echo(f"❌ Tile {tile_id} failed: {e}")
+                total_errors += 1
+    
+    # Save simulation completion status
+    save_run_info(output_dir, {
+        'simulations_complete': True,
+        'completed_tiles': completed_tiles,
+        'failed_tiles': total_errors,
+        'total_simulated_dates': total_simulated,
+        'total_skipped_dates': total_skipped
+    })
+    
+    click.secho(f"\\n✅ Shade simulations complete!", fg='green')
+    click.echo(f"   - Completed: {completed_tiles} tiles")
+    click.echo(f"   - Failed: {total_errors} tiles") 
+    click.echo(f"   - Total simulated: {total_simulated} dates")
+    click.echo(f"   - Total skipped: {total_skipped} dates")
+
 
 # --- STEP 7: Extract and Merge Shade Values ---
+
+@cli.command(name="extract-shade")
+@click.option("--config", default="config.yaml", type=click.Path(exists=True), help="Path to the configuration file.")
+def extract_shade_step(config):
+    """STEP 7: Extract shade values from rasters and merge with dataset."""
+    cfg = load_config(config)
+    output_dir = Path(cfg["output_dir"])
+    run_info = load_run_info(output_dir)
+    osmid = run_info.get("osmid")
+    if not osmid:
+        click.secho("Error: osmid not found. Please run the previous steps first.", fg="red")
+        return
+
+    click.echo(f"--- Running Step 7: Shade Extraction for Run ID: {osmid} ---")
+
+    all_year_results = []
+    
+    for year_str in cfg["year_configs"].keys():
+        proc_year = int(year_str)
+        
+        # Check if simulations were completed for this year
+        if not run_info.get(f"simulations_complete_{proc_year}"):
+            click.secho(f"Warning: Simulations not complete for year {proc_year}. Run simulate-shade first.", fg="yellow")
+            continue
+            
+        # Load the binned dataset and original dataset
+        binned_path = run_info.get(f"binned_dataset_{proc_year}")
+        if not binned_path or not Path(binned_path).exists():
+            click.secho(f"Error: Binned dataset not found for year {proc_year}", fg="red")
+            continue
+            
+        click.echo(f"-> Processing shade extraction for year {proc_year}...")
+        dataset_gdf = gpd.read_file(binned_path)
+        
+        # For this step, we need the original dataset too - reconstruct from binned data
+        # or load separately if available
+        original_dataset = dataset_gdf  # Simplified for now
+        
+        try:
+            dataset_final = extract_and_merge_shade_values_only(
+                dataset_gdf, osmid, cfg, original_dataset
+            )
+            all_year_results.append(dataset_final)
+            
+        except Exception as e:
+            click.secho(f"❌ Error extracting shade for year {proc_year}: {e}", fg="red")
+            continue
+    
+    # Combine and save final result
+    if all_year_results:
+        final_dataset = pd.concat(all_year_results, ignore_index=True)
+        final_dataset = gpd.GeoDataFrame(final_dataset, geometry="geometry")
+        
+        final_output_dir = output_dir / f"step6_final_result/{osmid}"
+        final_output_dir.mkdir(parents=True, exist_ok=True)
+        final_output_path = final_output_dir / "shaded_dataset.geojson"
+        
+        final_dataset.to_file(final_output_path, driver="GeoJSON")
+        click.secho(f"\n✅ Shade extraction complete! Final output: {final_output_path}", fg="green")
+    else:
+        click.secho("\n❌ No data was processed. No output file created.", fg="red")
+
+
+
+
+# =============================================================================
+# SPLIT PIPELINE STEPS
+# =============================================================================
+
+# --- STEP 5: Dataset Processing and Binning ---
+
+@cli.command(name='process-dataset')
+@click.option('--config', default='config.yaml', type=click.Path(exists=True), help='Path to the configuration file.')
+def process_dataset_step(config):
+    """STEP 5: Process and bin the dataset for shade simulation."""
+    cfg = load_config(config)
+    output_dir = Path(cfg['output_dir'])
+    run_info = load_run_info(output_dir)
+    osmid = run_info.get('osmid')
+    if not osmid:
+        click.secho("Error: 'osmid' not found. Please run the previous steps first.", fg='red')
+        return
+
+    click.echo(f"--- Running Step 5: Dataset Processing for Run ID: {osmid} ---")
+
+    # Load dataset flexibly based on file format
+    dataset = load_dataset_flexibly(cfg)
+    
+    try:
+        combined_dataset_gdf, combined_tile_grouped_days, combined_original_dataset, bin_output_path = process_full_dataset_combined(
+            dataset, osmid, cfg
+        )
+        
+        if combined_dataset_gdf is None:
+            click.secho("❌ No processable data found", fg='red')
+            return
+        
+        # Save processing metadata to run_info
+        save_run_info(output_dir, {
+            'binned_dataset_combined': str(bin_output_path),
+            'dataset_processed': True,
+            'processed_years': list(combined_dataset_gdf['time'].dt.year.unique()) if 'time' in combined_dataset_gdf.columns else ['unknown']
+        })
+        
+        click.secho(f"\n✅ Dataset processing complete! Output: {bin_output_path}", fg='green')
+        
+    except Exception as e:
+        click.secho(f"❌ Error processing dataset: {e}", fg='red')
+
+# --- STEP 6: Shade Simulation ---
+
+@click.option('--config', default='config.yaml', type=click.Path(exists=True), help='Path to the configuration file.')
+@click.option('--tile', help='Process only specific tile (e.g., p_0). If not provided, processes all tiles.')
+def simulate_shade_step(config, tile):
+    """STEP 6: Run computationally intensive shade simulations (OPTIMIZED)."""
+    cfg = load_config(config)
+    output_dir = Path(cfg['output_dir'])
+    run_info = load_run_info(output_dir)
+    osmid = run_info.get('osmid')
+    if not osmid:
+        click.secho("Error: 'osmid' not found. Please run the previous steps first.", fg='red')
+        return
+
+    click.echo(f"--- Running Step 6: Shade Simulations for Run ID: {osmid} ---")
+
+    # Check if dataset was processed
+    if not run_info.get('dataset_processed'):
+        click.secho("Warning: Dataset not processed. Run process-dataset first.", fg='yellow')
+        return
+        
+    # Look for per-tile metadata (optimization)
+    final_output_dir = output_dir / f"step6_final_result/{osmid}"
+    tiles_dir = final_output_dir / "tiles"
+    
+    if not tiles_dir.exists():
+        click.secho("Error: Per-tile metadata not found. Please re-run process-dataset to generate optimized metadata.", fg='red')
+        return
+    
+    # Build raster index once to avoid repeated file system calls
+    click.echo("-> Building raster index...")
+    raster_index = build_raster_index(osmid, cfg)
+    click.echo(f"   Found rasters for {len(raster_index)} tiles")
+    
+    # Discover available tiles
+    if tile:
+        # Process single tile
+        available_tiles = [tile] if (tiles_dir / f"tile_{tile}").exists() else []
+        if not available_tiles:
+            click.secho(f"Error: Tile {tile} not found in metadata", fg='red')
+            return
+    else:
+        # Discover all tiles
+        available_tiles = [d.name.replace('tile_', '') for d in tiles_dir.iterdir() 
+                          if d.is_dir() and d.name.startswith('tile_')]
+    
+    click.echo(f"-> Processing {len(available_tiles)} tiles...")
+    processed_years = run_info.get('processed_years', [2024])
+    
+    # Process each tile independently to minimize memory usage
+    total_tiles = len(available_tiles)
+    completed_tiles = 0
+    skipped_tiles = 0
+    
+    for tile_id in available_tiles:
+        click.echo(f"\\n🔄 Processing tile {tile_id} ({completed_tiles + 1}/{total_tiles})")
+        
+        try:
+            # Load minimal metadata for this tile only
+            tile_grouped_days = reconstruct_tile_grouped_days_from_parquet(str(tiles_dir), tile_id)
+            
+            if not tile_grouped_days:
+                click.echo(f"   ⚠️ No simulation dates found for tile {tile_id}, skipping")
+                skipped_tiles += 1
+                continue
+            
+            # Check if this tile has rasters
+            if tile_id not in raster_index:
+                click.echo(f"   ⚠️ No rasters found for tile {tile_id}, skipping")
+                skipped_tiles += 1
+                continue
+            
+            # Count how many dates we need to simulate
+            total_dates = len(tile_grouped_days)
+            simulated_dates = 0
+            skipped_dates = 0
+            
+            # Run simulations for each year and each date in this tile
+            for year in processed_years:
+                click.echo(f"   -> Year {year}: {total_dates} simulation dates")
+                
+                # Use single-threaded execution per tile to avoid nested multiprocessing
+                for sim_date, timestamps in tile_grouped_days.items():
+                    # Check if outputs already exist (idempotent execution)
+                    if should_skip_simulation(osmid, tile_id, sim_date, cfg):
+                        skipped_dates += 1
+                        continue
+                    
+                    # Create a dummy dataset_gdf with just the season info needed
+                    # Load season from the parquet metadata
+                    tile_dir = tiles_dir / f"tile_{tile_id}"
+                    meta_path = tile_dir / "meta.parquet"
+                    tile_meta = pd.read_parquet(meta_path)
+                    
+                    # Get season for this date (assuming all timestamps on same date have same season)
+                    date_meta = tile_meta[tile_meta['binned_date'] == str(sim_date)]
+                    if date_meta.empty:
+                        continue
+                        
+                    season = date_meta['season'].iloc[0]
+                    
+                    # Get simulation parameters based on season
+                    summer_params = cfg['seasons']['summer']
+                    winter_params = cfg['seasons']['winter']
+                    params = summer_params if season == 1 else winter_params
+                    
+                    # Run simulation for this tile+date (without ProcessPoolExecutor to avoid nesting)
+                    try:
+                        main_shade(osmid, tile_id, timestamps, sim_date, params, cfg)
+                        simulated_dates += 1
+                    except Exception as e:
+                        click.echo(f"   ❌ Error simulating {tile_id} on {sim_date}: {e}")
+            
+            click.echo(f"   ✅ Tile {tile_id}: {simulated_dates} simulated, {skipped_dates} skipped (already done)")
+            completed_tiles += 1
+            
+            # Force garbage collection after each tile to free memory
+            import gc
+            gc.collect()
+            
+        except Exception as e:
+            click.echo(f"   ❌ Error processing tile {tile_id}: {e}")
+            continue
+    
+    # Save simulation completion status
+    save_run_info(output_dir, {
+        'simulations_complete': True,
+        'completed_tiles': completed_tiles,
+        'skipped_tiles': skipped_tiles
+    })
+    
+    click.secho(f"\\n✅ Shade simulations complete!", fg='green')
+    click.echo(f"   - Completed: {completed_tiles} tiles")
+    click.echo(f"   - Skipped: {skipped_tiles} tiles")
+
 
 @cli.command(name='extract-shade')
 @click.option('--config', default='config.yaml', type=click.Path(exists=True), help='Path to the configuration file.')
