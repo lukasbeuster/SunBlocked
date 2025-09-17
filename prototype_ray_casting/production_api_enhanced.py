@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Union, Optional, Tuple
 from shapely.geometry import Point
 import json
 
@@ -372,11 +372,11 @@ class EdgeToPointsProcessor:
                     'sample_index': point_info['sample_index'],
                     'latitude': point_info['latitude'],
                     'longitude': point_info['longitude'],
-                    'current_shade': metrics.current_shade,
-                    'last_1h_fraction': metrics.last_1h_fraction,
-                    'last_2h_fraction': metrics.last_2h_fraction,
-                    'last_4h_fraction': metrics.last_4h_fraction,
-                    'since_dawn_fraction': metrics.since_dawn_fraction,
+                    'current_shade': metrics.current_shade_status,
+                    'last_1h_fraction': metrics.last_1h_shade_fraction,
+                    'last_2h_fraction': metrics.last_2h_shade_fraction,
+                    'last_4h_fraction': metrics.last_4h_shade_fraction,
+                    'since_dawn_fraction': metrics.cumulative_shade_fraction,
                     'timestamp': current_time.isoformat()
                 }
                 results.append(result)

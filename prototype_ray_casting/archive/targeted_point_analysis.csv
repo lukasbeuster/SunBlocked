@@ -1,0 +1,37 @@
+point_id,latitude,longitude,location_label,time_label,test_time,current_shade,last_1h_fraction,last_4h_fraction,cumulative_fraction,sun_elevation,sun_azimuth
+target_00_1214,42.358,-71.06,Southwest corner,Winter afternoon,2024-12-21 14:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_01_1214,42.358,-71.055,Southeast corner,Winter afternoon,2024-12-21 14:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_02_1214,42.362,-71.06,Northwest corner,Winter afternoon,2024-12-21 14:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_03_1214,42.362,-71.055,Northeast corner,Winter afternoon,2024-12-21 14:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_04_1214,42.36,-71.0575,Center area,Winter afternoon,2024-12-21 14:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_05_1214,42.359,-71.059,Southwest quadrant,Winter afternoon,2024-12-21 14:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_06_1214,42.359,-71.056,Southeast quadrant,Winter afternoon,2024-12-21 14:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_07_1214,42.361,-71.059,Northwest quadrant,Winter afternoon,2024-12-21 14:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_08_1214,42.361,-71.056,Northeast quadrant,Winter afternoon,2024-12-21 14:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_00_0608,42.358,-71.06,Southwest corner,Summer morning,2024-06-21 08:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_01_0608,42.358,-71.055,Southeast corner,Summer morning,2024-06-21 08:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_02_0608,42.362,-71.06,Northwest corner,Summer morning,2024-06-21 08:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_03_0608,42.362,-71.055,Northeast corner,Summer morning,2024-06-21 08:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_04_0608,42.36,-71.0575,Center area,Summer morning,2024-06-21 08:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_05_0608,42.359,-71.059,Southwest quadrant,Summer morning,2024-06-21 08:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_06_0608,42.359,-71.056,Southeast quadrant,Summer morning,2024-06-21 08:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_07_0608,42.361,-71.059,Northwest quadrant,Summer morning,2024-06-21 08:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_08_0608,42.361,-71.056,Northeast quadrant,Summer morning,2024-06-21 08:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_00_0618,42.358,-71.06,Southwest corner,Summer evening,2024-06-21 18:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_01_0618,42.358,-71.055,Southeast corner,Summer evening,2024-06-21 18:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_02_0618,42.362,-71.06,Northwest corner,Summer evening,2024-06-21 18:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_03_0618,42.362,-71.055,Northeast corner,Summer evening,2024-06-21 18:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_04_0618,42.36,-71.0575,Center area,Summer evening,2024-06-21 18:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_05_0618,42.359,-71.059,Southwest quadrant,Summer evening,2024-06-21 18:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_06_0618,42.359,-71.056,Southeast quadrant,Summer evening,2024-06-21 18:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_07_0618,42.361,-71.059,Northwest quadrant,Summer evening,2024-06-21 18:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_08_0618,42.361,-71.056,Northeast quadrant,Summer evening,2024-06-21 18:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_00_0912,42.358,-71.06,Southwest corner,Fall equinox noon,2024-09-22 12:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_01_0912,42.358,-71.055,Southeast corner,Fall equinox noon,2024-09-22 12:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_02_0912,42.362,-71.06,Northwest corner,Fall equinox noon,2024-09-22 12:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_03_0912,42.362,-71.055,Northeast corner,Fall equinox noon,2024-09-22 12:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_04_0912,42.36,-71.0575,Center area,Fall equinox noon,2024-09-22 12:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_05_0912,42.359,-71.059,Southwest quadrant,Fall equinox noon,2024-09-22 12:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_06_0912,42.359,-71.056,Southeast quadrant,Fall equinox noon,2024-09-22 12:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_07_0912,42.361,-71.059,Northwest quadrant,Fall equinox noon,2024-09-22 12:00:00,False,0.0,0.0,0.0,0.0,0.0
+target_08_0912,42.361,-71.056,Northeast quadrant,Fall equinox noon,2024-09-22 12:00:00,False,0.0,0.0,0.0,0.0,0.0

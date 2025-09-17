@@ -131,10 +131,10 @@ def sun_ray_direction(sun_pos: SunPosition) -> Tuple[float, float, float]:
     elevation_rad = np.radians(sun_pos.elevation)
     azimuth_rad = np.radians(sun_pos.azimuth)
     
-    # Calculate direction vector (pointing FROM ground TO sun - FIXED)
-    dx = np.sin(azimuth_rad) * np.cos(elevation_rad)
-    dy = np.cos(azimuth_rad) * np.cos(elevation_rad) 
-    dz = np.sin(elevation_rad)
+    # Calculate direction vector (pointing FROM sun TO ground)
+    dx = -np.sin(azimuth_rad) * np.cos(elevation_rad)
+    dy = -np.cos(azimuth_rad) * np.cos(elevation_rad) 
+    dz = -np.sin(elevation_rad)
     
     return dx, dy, dz
 

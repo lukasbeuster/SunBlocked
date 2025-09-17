@@ -1,0 +1,486 @@
+point_id,edge_id,sample_index,latitude,longitude,current_shade,last_1h_fraction,last_2h_fraction,last_4h_fraction,since_dawn_fraction,timestamp,scenario,season,test_time
+north_facing_001_0,north_facing_001,0,42.36,-71.058,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_1,north_facing_001,1,42.36,-71.05792813477727,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_2,north_facing_001,2,42.36,-71.05785626955455,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_3,north_facing_001,3,42.36,-71.05778440433181,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_4,north_facing_001,4,42.36,-71.05771253910909,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_5,north_facing_001,5,42.36,-71.05764067388635,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_6,north_facing_001,6,42.36,-71.05756880866363,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_7,north_facing_001,7,42.36,-71.05749694344091,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_8,north_facing_001,8,42.36,-71.05742507821817,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_9,north_facing_001,9,42.36,-71.05735321299544,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_10,north_facing_001,10,42.36,-71.0572813477727,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_11,north_facing_001,11,42.36,-71.05720948254998,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_12,north_facing_001,12,42.36,-71.05713761732726,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_13,north_facing_001,13,42.36,-71.05706575210452,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_14,north_facing_001,14,42.36,-71.0569938868818,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_15,north_facing_001,15,42.36,-71.05692202165906,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_16,north_facing_001,16,42.36,-71.05685015643634,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_17,north_facing_001,17,42.36,-71.0567782912136,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_18,north_facing_001,18,42.36,-71.05670642599087,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_19,north_facing_001,19,42.36,-71.05663456076815,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_20,north_facing_001,20,42.36,-71.05656269554541,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_21,north_facing_001,21,42.36,-71.05649083032269,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_22,north_facing_001,22,42.36,-71.05641896509997,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_23,north_facing_001,23,42.36,-71.05634709987723,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_24,north_facing_001,24,42.36,-71.0562752346545,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_25,north_facing_001,25,42.36,-71.05620336943176,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_26,north_facing_001,26,42.36,-71.05613150420903,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_27,north_facing_001,27,42.36,-71.05605963898631,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_28,north_facing_001,28,42.36,-71.05600000000001,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_0,ew_building_002,0,42.3595,-71.05899999999998,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_1,ew_building_002,1,42.3595,-71.05892813477726,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_2,ew_building_002,2,42.3595,-71.05885626955452,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_3,ew_building_002,3,42.3595,-71.0587844043318,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_4,ew_building_002,4,42.3595,-71.05871253910907,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_5,ew_building_002,5,42.3595,-71.05864067388634,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_6,ew_building_002,6,42.3595,-71.05856880866362,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_7,ew_building_002,7,42.3595,-71.05849694344087,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_8,ew_building_002,8,42.3595,-71.05842507821815,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_9,ew_building_002,9,42.3595,-71.05835321299541,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_10,ew_building_002,10,42.3595,-71.05828134777269,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_11,ew_building_002,11,42.3595,-71.05820948254997,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_12,ew_building_002,12,42.3595,-71.05813761732723,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_13,ew_building_002,13,42.3595,-71.05806575210451,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_14,ew_building_002,14,42.3595,-71.05799388688177,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_15,ew_building_002,15,42.3595,-71.05792202165904,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_16,ew_building_002,16,42.3595,-71.05785015643632,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_17,ew_building_002,17,42.3595,-71.05777829121358,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_18,ew_building_002,18,42.3595,-71.05770642599086,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_19,ew_building_002,19,42.3595,-71.05763456076812,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_20,ew_building_002,20,42.3595,-71.0575626955454,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_21,ew_building_002,21,42.3595,-71.05749083032268,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_22,ew_building_002,22,42.3595,-71.05741896509994,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_23,ew_building_002,23,42.3595,-71.0573470998772,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_24,ew_building_002,24,42.3595,-71.05727523465447,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_25,ew_building_002,25,42.3595,-71.05720336943175,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_26,ew_building_002,26,42.3595,-71.05713150420902,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_27,ew_building_002,27,42.3595,-71.05705963898629,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+ew_building_002_28,ew_building_002,28,42.3595,-71.057,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_0,urban_canyon_003,0,42.358999999999995,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_1,urban_canyon_003,1,42.359053103897956,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_2,urban_canyon_003,2,42.35910620775103,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_3,urban_canyon_003,3,42.35915931155924,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_4,urban_canyon_003,4,42.35921241532255,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_5,urban_canyon_003,5,42.359265519040996,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_6,urban_canyon_003,6,42.35931862271456,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_7,urban_canyon_003,7,42.35937172634325,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_8,urban_canyon_003,8,42.35942482992705,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_9,urban_canyon_003,9,42.35947793346598,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_10,urban_canyon_003,10,42.35953103696003,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_11,urban_canyon_003,11,42.359584140409204,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_12,urban_canyon_003,12,42.359637243813495,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_13,urban_canyon_003,13,42.359690347172915,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_14,urban_canyon_003,14,42.35974345048745,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_15,urban_canyon_003,15,42.35979655375711,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_16,urban_canyon_003,16,42.35984965698188,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_17,urban_canyon_003,17,42.35990276016179,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_18,urban_canyon_003,18,42.35995586329681,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_19,urban_canyon_003,19,42.36000896638695,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_20,urban_canyon_003,20,42.36006206943222,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_21,urban_canyon_003,21,42.3601151724326,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_22,urban_canyon_003,22,42.36016827538811,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_23,urban_canyon_003,23,42.360221378298746,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_24,urban_canyon_003,24,42.360274481164495,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_25,urban_canyon_003,25,42.36032758398537,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_26,urban_canyon_003,26,42.36038068676137,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_27,urban_canyon_003,27,42.36043378949248,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_28,urban_canyon_003,28,42.36048689217871,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_29,urban_canyon_003,29,42.36053999482008,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_30,urban_canyon_003,30,42.360593097416555,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_31,urban_canyon_003,31,42.36064619996816,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_32,urban_canyon_003,32,42.36069930247488,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_33,urban_canyon_003,33,42.360752404936726,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_34,urban_canyon_003,34,42.360805507353696,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_35,urban_canyon_003,35,42.36085860972578,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_36,urban_canyon_003,36,42.36091171205299,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_37,urban_canyon_003,37,42.36096481433532,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+urban_canyon_003_38,urban_canyon_003,38,42.361,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T08:00:00,Winter Dawn,winter,2024-12-21 08:00:00
+north_facing_001_0,north_facing_001,0,42.36,-71.058,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_1,north_facing_001,1,42.36,-71.05792813477727,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_2,north_facing_001,2,42.36,-71.05785626955455,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_3,north_facing_001,3,42.36,-71.05778440433181,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_4,north_facing_001,4,42.36,-71.05771253910909,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_5,north_facing_001,5,42.36,-71.05764067388635,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_6,north_facing_001,6,42.36,-71.05756880866363,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_7,north_facing_001,7,42.36,-71.05749694344091,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_8,north_facing_001,8,42.36,-71.05742507821817,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_9,north_facing_001,9,42.36,-71.05735321299544,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_10,north_facing_001,10,42.36,-71.0572813477727,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_11,north_facing_001,11,42.36,-71.05720948254998,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_12,north_facing_001,12,42.36,-71.05713761732726,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_13,north_facing_001,13,42.36,-71.05706575210452,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_14,north_facing_001,14,42.36,-71.0569938868818,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_15,north_facing_001,15,42.36,-71.05692202165906,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_16,north_facing_001,16,42.36,-71.05685015643634,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_17,north_facing_001,17,42.36,-71.0567782912136,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_18,north_facing_001,18,42.36,-71.05670642599087,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_19,north_facing_001,19,42.36,-71.05663456076815,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_20,north_facing_001,20,42.36,-71.05656269554541,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_21,north_facing_001,21,42.36,-71.05649083032269,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_22,north_facing_001,22,42.36,-71.05641896509997,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_23,north_facing_001,23,42.36,-71.05634709987723,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_24,north_facing_001,24,42.36,-71.0562752346545,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_25,north_facing_001,25,42.36,-71.05620336943176,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_26,north_facing_001,26,42.36,-71.05613150420903,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_27,north_facing_001,27,42.36,-71.05605963898631,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_28,north_facing_001,28,42.36,-71.05600000000001,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_0,ew_building_002,0,42.3595,-71.05899999999998,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_1,ew_building_002,1,42.3595,-71.05892813477726,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_2,ew_building_002,2,42.3595,-71.05885626955452,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_3,ew_building_002,3,42.3595,-71.0587844043318,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_4,ew_building_002,4,42.3595,-71.05871253910907,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_5,ew_building_002,5,42.3595,-71.05864067388634,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_6,ew_building_002,6,42.3595,-71.05856880866362,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_7,ew_building_002,7,42.3595,-71.05849694344087,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_8,ew_building_002,8,42.3595,-71.05842507821815,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_9,ew_building_002,9,42.3595,-71.05835321299541,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_10,ew_building_002,10,42.3595,-71.05828134777269,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_11,ew_building_002,11,42.3595,-71.05820948254997,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_12,ew_building_002,12,42.3595,-71.05813761732723,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_13,ew_building_002,13,42.3595,-71.05806575210451,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_14,ew_building_002,14,42.3595,-71.05799388688177,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_15,ew_building_002,15,42.3595,-71.05792202165904,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_16,ew_building_002,16,42.3595,-71.05785015643632,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_17,ew_building_002,17,42.3595,-71.05777829121358,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_18,ew_building_002,18,42.3595,-71.05770642599086,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_19,ew_building_002,19,42.3595,-71.05763456076812,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_20,ew_building_002,20,42.3595,-71.0575626955454,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_21,ew_building_002,21,42.3595,-71.05749083032268,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_22,ew_building_002,22,42.3595,-71.05741896509994,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_23,ew_building_002,23,42.3595,-71.0573470998772,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_24,ew_building_002,24,42.3595,-71.05727523465447,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_25,ew_building_002,25,42.3595,-71.05720336943175,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_26,ew_building_002,26,42.3595,-71.05713150420902,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_27,ew_building_002,27,42.3595,-71.05705963898629,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+ew_building_002_28,ew_building_002,28,42.3595,-71.057,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_0,urban_canyon_003,0,42.358999999999995,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_1,urban_canyon_003,1,42.359053103897956,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_2,urban_canyon_003,2,42.35910620775103,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_3,urban_canyon_003,3,42.35915931155924,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_4,urban_canyon_003,4,42.35921241532255,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_5,urban_canyon_003,5,42.359265519040996,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_6,urban_canyon_003,6,42.35931862271456,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_7,urban_canyon_003,7,42.35937172634325,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_8,urban_canyon_003,8,42.35942482992705,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_9,urban_canyon_003,9,42.35947793346598,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_10,urban_canyon_003,10,42.35953103696003,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_11,urban_canyon_003,11,42.359584140409204,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_12,urban_canyon_003,12,42.359637243813495,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_13,urban_canyon_003,13,42.359690347172915,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_14,urban_canyon_003,14,42.35974345048745,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_15,urban_canyon_003,15,42.35979655375711,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_16,urban_canyon_003,16,42.35984965698188,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_17,urban_canyon_003,17,42.35990276016179,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_18,urban_canyon_003,18,42.35995586329681,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_19,urban_canyon_003,19,42.36000896638695,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_20,urban_canyon_003,20,42.36006206943222,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_21,urban_canyon_003,21,42.3601151724326,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_22,urban_canyon_003,22,42.36016827538811,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_23,urban_canyon_003,23,42.360221378298746,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_24,urban_canyon_003,24,42.360274481164495,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_25,urban_canyon_003,25,42.36032758398537,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_26,urban_canyon_003,26,42.36038068676137,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_27,urban_canyon_003,27,42.36043378949248,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_28,urban_canyon_003,28,42.36048689217871,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_29,urban_canyon_003,29,42.36053999482008,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_30,urban_canyon_003,30,42.360593097416555,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_31,urban_canyon_003,31,42.36064619996816,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_32,urban_canyon_003,32,42.36069930247488,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_33,urban_canyon_003,33,42.360752404936726,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_34,urban_canyon_003,34,42.360805507353696,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_35,urban_canyon_003,35,42.36085860972578,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_36,urban_canyon_003,36,42.36091171205299,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_37,urban_canyon_003,37,42.36096481433532,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+urban_canyon_003_38,urban_canyon_003,38,42.361,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T12:00:00,Winter Noon,winter,2024-12-21 12:00:00
+north_facing_001_0,north_facing_001,0,42.36,-71.058,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_1,north_facing_001,1,42.36,-71.05792813477727,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_2,north_facing_001,2,42.36,-71.05785626955455,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_3,north_facing_001,3,42.36,-71.05778440433181,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_4,north_facing_001,4,42.36,-71.05771253910909,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_5,north_facing_001,5,42.36,-71.05764067388635,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_6,north_facing_001,6,42.36,-71.05756880866363,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_7,north_facing_001,7,42.36,-71.05749694344091,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_8,north_facing_001,8,42.36,-71.05742507821817,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_9,north_facing_001,9,42.36,-71.05735321299544,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_10,north_facing_001,10,42.36,-71.0572813477727,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_11,north_facing_001,11,42.36,-71.05720948254998,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_12,north_facing_001,12,42.36,-71.05713761732726,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_13,north_facing_001,13,42.36,-71.05706575210452,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_14,north_facing_001,14,42.36,-71.0569938868818,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_15,north_facing_001,15,42.36,-71.05692202165906,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_16,north_facing_001,16,42.36,-71.05685015643634,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_17,north_facing_001,17,42.36,-71.0567782912136,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_18,north_facing_001,18,42.36,-71.05670642599087,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_19,north_facing_001,19,42.36,-71.05663456076815,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_20,north_facing_001,20,42.36,-71.05656269554541,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_21,north_facing_001,21,42.36,-71.05649083032269,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_22,north_facing_001,22,42.36,-71.05641896509997,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_23,north_facing_001,23,42.36,-71.05634709987723,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_24,north_facing_001,24,42.36,-71.0562752346545,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_25,north_facing_001,25,42.36,-71.05620336943176,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_26,north_facing_001,26,42.36,-71.05613150420903,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_27,north_facing_001,27,42.36,-71.05605963898631,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_28,north_facing_001,28,42.36,-71.05600000000001,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_0,ew_building_002,0,42.3595,-71.05899999999998,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_1,ew_building_002,1,42.3595,-71.05892813477726,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_2,ew_building_002,2,42.3595,-71.05885626955452,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_3,ew_building_002,3,42.3595,-71.0587844043318,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_4,ew_building_002,4,42.3595,-71.05871253910907,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_5,ew_building_002,5,42.3595,-71.05864067388634,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_6,ew_building_002,6,42.3595,-71.05856880866362,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_7,ew_building_002,7,42.3595,-71.05849694344087,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_8,ew_building_002,8,42.3595,-71.05842507821815,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_9,ew_building_002,9,42.3595,-71.05835321299541,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_10,ew_building_002,10,42.3595,-71.05828134777269,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_11,ew_building_002,11,42.3595,-71.05820948254997,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_12,ew_building_002,12,42.3595,-71.05813761732723,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_13,ew_building_002,13,42.3595,-71.05806575210451,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_14,ew_building_002,14,42.3595,-71.05799388688177,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_15,ew_building_002,15,42.3595,-71.05792202165904,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_16,ew_building_002,16,42.3595,-71.05785015643632,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_17,ew_building_002,17,42.3595,-71.05777829121358,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_18,ew_building_002,18,42.3595,-71.05770642599086,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_19,ew_building_002,19,42.3595,-71.05763456076812,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_20,ew_building_002,20,42.3595,-71.0575626955454,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_21,ew_building_002,21,42.3595,-71.05749083032268,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_22,ew_building_002,22,42.3595,-71.05741896509994,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_23,ew_building_002,23,42.3595,-71.0573470998772,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_24,ew_building_002,24,42.3595,-71.05727523465447,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_25,ew_building_002,25,42.3595,-71.05720336943175,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_26,ew_building_002,26,42.3595,-71.05713150420902,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_27,ew_building_002,27,42.3595,-71.05705963898629,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+ew_building_002_28,ew_building_002,28,42.3595,-71.057,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_0,urban_canyon_003,0,42.358999999999995,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_1,urban_canyon_003,1,42.359053103897956,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_2,urban_canyon_003,2,42.35910620775103,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_3,urban_canyon_003,3,42.35915931155924,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_4,urban_canyon_003,4,42.35921241532255,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_5,urban_canyon_003,5,42.359265519040996,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_6,urban_canyon_003,6,42.35931862271456,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_7,urban_canyon_003,7,42.35937172634325,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_8,urban_canyon_003,8,42.35942482992705,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_9,urban_canyon_003,9,42.35947793346598,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_10,urban_canyon_003,10,42.35953103696003,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_11,urban_canyon_003,11,42.359584140409204,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_12,urban_canyon_003,12,42.359637243813495,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_13,urban_canyon_003,13,42.359690347172915,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_14,urban_canyon_003,14,42.35974345048745,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_15,urban_canyon_003,15,42.35979655375711,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_16,urban_canyon_003,16,42.35984965698188,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_17,urban_canyon_003,17,42.35990276016179,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_18,urban_canyon_003,18,42.35995586329681,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_19,urban_canyon_003,19,42.36000896638695,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_20,urban_canyon_003,20,42.36006206943222,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_21,urban_canyon_003,21,42.3601151724326,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_22,urban_canyon_003,22,42.36016827538811,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_23,urban_canyon_003,23,42.360221378298746,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_24,urban_canyon_003,24,42.360274481164495,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_25,urban_canyon_003,25,42.36032758398537,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_26,urban_canyon_003,26,42.36038068676137,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_27,urban_canyon_003,27,42.36043378949248,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_28,urban_canyon_003,28,42.36048689217871,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_29,urban_canyon_003,29,42.36053999482008,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_30,urban_canyon_003,30,42.360593097416555,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_31,urban_canyon_003,31,42.36064619996816,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_32,urban_canyon_003,32,42.36069930247488,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_33,urban_canyon_003,33,42.360752404936726,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_34,urban_canyon_003,34,42.360805507353696,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_35,urban_canyon_003,35,42.36085860972578,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_36,urban_canyon_003,36,42.36091171205299,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_37,urban_canyon_003,37,42.36096481433532,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+urban_canyon_003_38,urban_canyon_003,38,42.361,-71.0575,False,0.0,0.0,0.0,0.0,2024-12-21T16:00:00,Winter Late Afternoon,winter,2024-12-21 16:00:00
+north_facing_001_0,north_facing_001,0,42.36,-71.058,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_1,north_facing_001,1,42.36,-71.05792813477727,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_2,north_facing_001,2,42.36,-71.05785626955455,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_3,north_facing_001,3,42.36,-71.05778440433181,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_4,north_facing_001,4,42.36,-71.05771253910909,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_5,north_facing_001,5,42.36,-71.05764067388635,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_6,north_facing_001,6,42.36,-71.05756880866363,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_7,north_facing_001,7,42.36,-71.05749694344091,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_8,north_facing_001,8,42.36,-71.05742507821817,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_9,north_facing_001,9,42.36,-71.05735321299544,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_10,north_facing_001,10,42.36,-71.0572813477727,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_11,north_facing_001,11,42.36,-71.05720948254998,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_12,north_facing_001,12,42.36,-71.05713761732726,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_13,north_facing_001,13,42.36,-71.05706575210452,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_14,north_facing_001,14,42.36,-71.0569938868818,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_15,north_facing_001,15,42.36,-71.05692202165906,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_16,north_facing_001,16,42.36,-71.05685015643634,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_17,north_facing_001,17,42.36,-71.0567782912136,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_18,north_facing_001,18,42.36,-71.05670642599087,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_19,north_facing_001,19,42.36,-71.05663456076815,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_20,north_facing_001,20,42.36,-71.05656269554541,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_21,north_facing_001,21,42.36,-71.05649083032269,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_22,north_facing_001,22,42.36,-71.05641896509997,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_23,north_facing_001,23,42.36,-71.05634709987723,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_24,north_facing_001,24,42.36,-71.0562752346545,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_25,north_facing_001,25,42.36,-71.05620336943176,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_26,north_facing_001,26,42.36,-71.05613150420903,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_27,north_facing_001,27,42.36,-71.05605963898631,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_28,north_facing_001,28,42.36,-71.05600000000001,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_0,ew_building_002,0,42.3595,-71.05899999999998,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_1,ew_building_002,1,42.3595,-71.05892813477726,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_2,ew_building_002,2,42.3595,-71.05885626955452,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_3,ew_building_002,3,42.3595,-71.0587844043318,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_4,ew_building_002,4,42.3595,-71.05871253910907,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_5,ew_building_002,5,42.3595,-71.05864067388634,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_6,ew_building_002,6,42.3595,-71.05856880866362,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_7,ew_building_002,7,42.3595,-71.05849694344087,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_8,ew_building_002,8,42.3595,-71.05842507821815,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_9,ew_building_002,9,42.3595,-71.05835321299541,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_10,ew_building_002,10,42.3595,-71.05828134777269,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_11,ew_building_002,11,42.3595,-71.05820948254997,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_12,ew_building_002,12,42.3595,-71.05813761732723,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_13,ew_building_002,13,42.3595,-71.05806575210451,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_14,ew_building_002,14,42.3595,-71.05799388688177,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_15,ew_building_002,15,42.3595,-71.05792202165904,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_16,ew_building_002,16,42.3595,-71.05785015643632,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_17,ew_building_002,17,42.3595,-71.05777829121358,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_18,ew_building_002,18,42.3595,-71.05770642599086,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_19,ew_building_002,19,42.3595,-71.05763456076812,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_20,ew_building_002,20,42.3595,-71.0575626955454,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_21,ew_building_002,21,42.3595,-71.05749083032268,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_22,ew_building_002,22,42.3595,-71.05741896509994,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_23,ew_building_002,23,42.3595,-71.0573470998772,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_24,ew_building_002,24,42.3595,-71.05727523465447,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_25,ew_building_002,25,42.3595,-71.05720336943175,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_26,ew_building_002,26,42.3595,-71.05713150420902,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_27,ew_building_002,27,42.3595,-71.05705963898629,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+ew_building_002_28,ew_building_002,28,42.3595,-71.057,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_0,urban_canyon_003,0,42.358999999999995,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_1,urban_canyon_003,1,42.359053103897956,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_2,urban_canyon_003,2,42.35910620775103,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_3,urban_canyon_003,3,42.35915931155924,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_4,urban_canyon_003,4,42.35921241532255,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_5,urban_canyon_003,5,42.359265519040996,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_6,urban_canyon_003,6,42.35931862271456,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_7,urban_canyon_003,7,42.35937172634325,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_8,urban_canyon_003,8,42.35942482992705,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_9,urban_canyon_003,9,42.35947793346598,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_10,urban_canyon_003,10,42.35953103696003,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_11,urban_canyon_003,11,42.359584140409204,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_12,urban_canyon_003,12,42.359637243813495,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_13,urban_canyon_003,13,42.359690347172915,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_14,urban_canyon_003,14,42.35974345048745,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_15,urban_canyon_003,15,42.35979655375711,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_16,urban_canyon_003,16,42.35984965698188,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_17,urban_canyon_003,17,42.35990276016179,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_18,urban_canyon_003,18,42.35995586329681,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_19,urban_canyon_003,19,42.36000896638695,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_20,urban_canyon_003,20,42.36006206943222,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_21,urban_canyon_003,21,42.3601151724326,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_22,urban_canyon_003,22,42.36016827538811,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_23,urban_canyon_003,23,42.360221378298746,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_24,urban_canyon_003,24,42.360274481164495,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_25,urban_canyon_003,25,42.36032758398537,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_26,urban_canyon_003,26,42.36038068676137,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_27,urban_canyon_003,27,42.36043378949248,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_28,urban_canyon_003,28,42.36048689217871,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_29,urban_canyon_003,29,42.36053999482008,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_30,urban_canyon_003,30,42.360593097416555,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_31,urban_canyon_003,31,42.36064619996816,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_32,urban_canyon_003,32,42.36069930247488,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_33,urban_canyon_003,33,42.360752404936726,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_34,urban_canyon_003,34,42.360805507353696,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_35,urban_canyon_003,35,42.36085860972578,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_36,urban_canyon_003,36,42.36091171205299,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_37,urban_canyon_003,37,42.36096481433532,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+urban_canyon_003_38,urban_canyon_003,38,42.361,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T09:00:00,Spring Equinox Morning,spring,2024-03-20 09:00:00
+north_facing_001_0,north_facing_001,0,42.36,-71.058,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_1,north_facing_001,1,42.36,-71.05792813477727,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_2,north_facing_001,2,42.36,-71.05785626955455,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_3,north_facing_001,3,42.36,-71.05778440433181,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_4,north_facing_001,4,42.36,-71.05771253910909,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_5,north_facing_001,5,42.36,-71.05764067388635,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_6,north_facing_001,6,42.36,-71.05756880866363,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_7,north_facing_001,7,42.36,-71.05749694344091,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_8,north_facing_001,8,42.36,-71.05742507821817,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_9,north_facing_001,9,42.36,-71.05735321299544,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_10,north_facing_001,10,42.36,-71.0572813477727,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_11,north_facing_001,11,42.36,-71.05720948254998,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_12,north_facing_001,12,42.36,-71.05713761732726,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_13,north_facing_001,13,42.36,-71.05706575210452,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_14,north_facing_001,14,42.36,-71.0569938868818,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_15,north_facing_001,15,42.36,-71.05692202165906,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_16,north_facing_001,16,42.36,-71.05685015643634,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_17,north_facing_001,17,42.36,-71.0567782912136,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_18,north_facing_001,18,42.36,-71.05670642599087,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_19,north_facing_001,19,42.36,-71.05663456076815,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_20,north_facing_001,20,42.36,-71.05656269554541,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_21,north_facing_001,21,42.36,-71.05649083032269,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_22,north_facing_001,22,42.36,-71.05641896509997,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_23,north_facing_001,23,42.36,-71.05634709987723,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_24,north_facing_001,24,42.36,-71.0562752346545,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_25,north_facing_001,25,42.36,-71.05620336943176,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_26,north_facing_001,26,42.36,-71.05613150420903,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_27,north_facing_001,27,42.36,-71.05605963898631,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+north_facing_001_28,north_facing_001,28,42.36,-71.05600000000001,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_0,ew_building_002,0,42.3595,-71.05899999999998,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_1,ew_building_002,1,42.3595,-71.05892813477726,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_2,ew_building_002,2,42.3595,-71.05885626955452,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_3,ew_building_002,3,42.3595,-71.0587844043318,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_4,ew_building_002,4,42.3595,-71.05871253910907,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_5,ew_building_002,5,42.3595,-71.05864067388634,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_6,ew_building_002,6,42.3595,-71.05856880866362,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_7,ew_building_002,7,42.3595,-71.05849694344087,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_8,ew_building_002,8,42.3595,-71.05842507821815,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_9,ew_building_002,9,42.3595,-71.05835321299541,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_10,ew_building_002,10,42.3595,-71.05828134777269,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_11,ew_building_002,11,42.3595,-71.05820948254997,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_12,ew_building_002,12,42.3595,-71.05813761732723,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_13,ew_building_002,13,42.3595,-71.05806575210451,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_14,ew_building_002,14,42.3595,-71.05799388688177,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_15,ew_building_002,15,42.3595,-71.05792202165904,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_16,ew_building_002,16,42.3595,-71.05785015643632,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_17,ew_building_002,17,42.3595,-71.05777829121358,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_18,ew_building_002,18,42.3595,-71.05770642599086,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_19,ew_building_002,19,42.3595,-71.05763456076812,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_20,ew_building_002,20,42.3595,-71.0575626955454,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_21,ew_building_002,21,42.3595,-71.05749083032268,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_22,ew_building_002,22,42.3595,-71.05741896509994,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_23,ew_building_002,23,42.3595,-71.0573470998772,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_24,ew_building_002,24,42.3595,-71.05727523465447,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_25,ew_building_002,25,42.3595,-71.05720336943175,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_26,ew_building_002,26,42.3595,-71.05713150420902,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_27,ew_building_002,27,42.3595,-71.05705963898629,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+ew_building_002_28,ew_building_002,28,42.3595,-71.057,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_0,urban_canyon_003,0,42.358999999999995,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_1,urban_canyon_003,1,42.359053103897956,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_2,urban_canyon_003,2,42.35910620775103,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_3,urban_canyon_003,3,42.35915931155924,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_4,urban_canyon_003,4,42.35921241532255,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_5,urban_canyon_003,5,42.359265519040996,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_6,urban_canyon_003,6,42.35931862271456,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_7,urban_canyon_003,7,42.35937172634325,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_8,urban_canyon_003,8,42.35942482992705,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_9,urban_canyon_003,9,42.35947793346598,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_10,urban_canyon_003,10,42.35953103696003,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_11,urban_canyon_003,11,42.359584140409204,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_12,urban_canyon_003,12,42.359637243813495,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_13,urban_canyon_003,13,42.359690347172915,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_14,urban_canyon_003,14,42.35974345048745,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_15,urban_canyon_003,15,42.35979655375711,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_16,urban_canyon_003,16,42.35984965698188,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_17,urban_canyon_003,17,42.35990276016179,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_18,urban_canyon_003,18,42.35995586329681,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_19,urban_canyon_003,19,42.36000896638695,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_20,urban_canyon_003,20,42.36006206943222,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_21,urban_canyon_003,21,42.3601151724326,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_22,urban_canyon_003,22,42.36016827538811,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_23,urban_canyon_003,23,42.360221378298746,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_24,urban_canyon_003,24,42.360274481164495,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_25,urban_canyon_003,25,42.36032758398537,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_26,urban_canyon_003,26,42.36038068676137,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_27,urban_canyon_003,27,42.36043378949248,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_28,urban_canyon_003,28,42.36048689217871,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_29,urban_canyon_003,29,42.36053999482008,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_30,urban_canyon_003,30,42.360593097416555,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_31,urban_canyon_003,31,42.36064619996816,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_32,urban_canyon_003,32,42.36069930247488,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_33,urban_canyon_003,33,42.360752404936726,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_34,urban_canyon_003,34,42.360805507353696,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_35,urban_canyon_003,35,42.36085860972578,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_36,urban_canyon_003,36,42.36091171205299,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_37,urban_canyon_003,37,42.36096481433532,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
+urban_canyon_003_38,urban_canyon_003,38,42.361,-71.0575,False,0.0,0.0,0.0,0.0,2024-03-20T15:00:00,Spring Equinox Afternoon,spring,2024-03-20 15:00:00
