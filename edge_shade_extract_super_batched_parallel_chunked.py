@@ -163,8 +163,9 @@ def _zonal_mean_many(gdf: gpd.GeoDataFrame, files: List[Path], file_type: str) -
     except Exception as e:
         return [np.nan] * len(gdf)
 
-def process_single_super_batch(batch_info: Dict, edges_gdf: gpd.GeoDataFrame, 
-                              shade_results_path: Path, osmid: str) -> List[Dict]:
+def process_single_super_batch(batch_info: Dict, edges_gdf: gpd.GeoDataFrame,
+                              shade_results_path: Path, osmid: str,
+                              historical_hours: Optional[List[int]] = None) -> List[Dict]:
     """Process a single super-batch in a worker process"""
     
     binned_date = batch_info['binned_date']
@@ -196,21 +197,67 @@ def process_single_super_batch(batch_info: Dict, edges_gdf: gpd.GeoDataFrame,
     if len(gdf_sub) == 0:
         return []
     
-    # Vectorized zonal statistics 
+    # Vectorized zonal statistics
     shadow_means = _zonal_mean_many(gdf_sub, shadow_files, 'shadow')
     fraction_means = _zonal_mean_many(gdf_sub, fraction_files, 'fraction')
+
+    # Historical (lookback) shade windows reuse the same gdf subset
+    sanitized_hours = []
+    if historical_hours:
+        sanitized_hours = sorted({int(h) for h in historical_hours if h is not None and h > 0})
+
+    shade_offsets: Dict[int, List[float]] = {0: shadow_means}
+    offsets_required: List[int] = []
+    if sanitized_hours:
+        # Compute union of offsets needed across all requested windows (current hour included)
+        offsets_required = sorted({offset for hour in sanitized_hours for offset in range(hour + 1)})
+        # We already have offset 0 values
+        offsets_to_compute = [o for o in offsets_required if o != 0]
+
+        # Compose reference timestamp for computing prior hour strings (matches legacy aggregation script behaviour)
+        base_time = datetime.strptime(hour_of_day, '%H%M')
+        current_dt = datetime.combine(binned_date_ts.date(), base_time.time())
+
+        for offset in offsets_to_compute:
+            target_dt = current_dt - timedelta(hours=offset)
+            target_hour = target_dt.strftime('%H%M')
+            # Historical lookups intentionally stick with the same binned_date folder
+            target_files = inventory.get_raster_files(tiles, date_str, target_hour, 'shadow')
+            shade_offsets[offset] = _zonal_mean_many(gdf_sub, target_files, 'shadow')
+
+    window_offsets: Dict[int, List[int]] = {}
+    if sanitized_hours:
+        window_offsets = {hour: [o for o in offsets_required if o <= hour] for hour in sanitized_hours}
     
     # Build results for all edges in batch
     results = []
-    for uid, shadow_val, fraction_val in zip(gdf_sub['edge_uid'].tolist(), shadow_means, fraction_means):
-        results.append({
+    for idx, (uid, shadow_val, fraction_val) in enumerate(zip(gdf_sub['edge_uid'].tolist(), shadow_means, fraction_means)):
+        row = {
             'edge_uid': uid,
             'binned_date': binned_date_ts,
             'hour_of_day': hour_of_day,
             'current_shade': None if pd.isna(shadow_val) else round(float(shadow_val), 3),
             'shadow_fraction': None if pd.isna(fraction_val) else round(float(fraction_val), 3),
-        })
-    
+        }
+
+        if sanitized_hours:
+            for hour in sanitized_hours:
+                offsets = window_offsets.get(hour, [])
+                values = []
+                for offset in offsets:
+                    offset_vals = shade_offsets.get(offset)
+                    if not offset_vals:
+                        continue
+                    candidate = offset_vals[idx]
+                    if pd.isna(candidate):
+                        continue
+                    values.append(float(candidate))
+
+                key = f'shade_{hour}h_before'
+                row[key] = None if not values else round(float(np.mean(values)), 3)
+
+        results.append(row)
+
     return results
 
 def analyze_results(results_df: pd.DataFrame) -> None:
@@ -299,9 +346,16 @@ def analyze_results(results_df: pd.DataFrame) -> None:
 
 class ParallelSuperBatchedExtractor:
     """PARALLEL SUPER-BATCHED: Multi-core extractor with worker processes"""
+
+    @staticmethod
+    def _sanitize_historical_hours(hours: Optional[List[int]]) -> List[int]:
+        if not hours:
+            return []
+        cleaned = sorted({int(h) for h in hours if h is not None and h > 0})
+        return cleaned
     
-    def __init__(self, points_parquet: Path, edge_file: Path, shade_results_path: Path, 
-                 osmid: str, output_dir: Path):
+    def __init__(self, points_parquet: Path, edge_file: Path, shade_results_path: Path,
+                 osmid: str, output_dir: Path, historical_hours: Optional[List[int]] = None):
         
         self.points_parquet = Path(points_parquet)
         self.edge_file = Path(edge_file)
@@ -309,6 +363,8 @@ class ParallelSuperBatchedExtractor:
         self.osmid = osmid
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+
+        self.historical_hours = self._sanitize_historical_hours(historical_hours)
         
         self.stats = {
             'start_time': time.time(),
@@ -335,6 +391,7 @@ class ParallelSuperBatchedExtractor:
         logging.info(f"  📐 EDGE_FILE (geometries): {self.edge_file}")
         logging.info(f"  🗂️ SHADE_RESULTS: {self.shade_results_path}")
         logging.info(f"  ⚡ WORKERS: {workers} parallel processes")
+        logging.info(f"  ⏱️ Historical windows (hours): {self.historical_hours if self.historical_hours else 'disabled'}")
         
         # Phase 1: Build inventory (main process only, for logging)
         main_inventory = TileInventory(self.shade_results_path, self.osmid)
@@ -417,8 +474,14 @@ class ParallelSuperBatchedExtractor:
                 
                 # Submit jobs for this chunk
                 future_to_batch = {
-                    executor.submit(process_single_super_batch, batch_info, edges_gdf, 
-                                   self.shade_results_path, self.osmid): batch_info 
+                    executor.submit(
+                        process_single_super_batch,
+                        batch_info,
+                        edges_gdf,
+                        self.shade_results_path,
+                        self.osmid,
+                        self.historical_hours,
+                    ): batch_info
                     for batch_info in chunk
                 }
                 
@@ -639,6 +702,14 @@ def main():
     parser.add_argument('--dry-run', action='store_true', help='Dry run mode')
     parser.add_argument('--sanity-check', type=int, metavar='N', help='Sanity check mode: process only N super-batches')
     parser.add_argument('--workers', type=int, default=4, help='Number of parallel workers (default: 4)')
+    parser.add_argument(
+        '--historical-hours',
+        type=int,
+        nargs='*',
+        default=[2, 4],
+        help=('Historical shade windows in hours (averaged with the current hour). '
+              'Example: --historical-hours 1 3 6. Leave empty to disable.'),
+    )
     parser.add_argument('--log-level', default='INFO', help='Logging level')
     
     args = parser.parse_args()
@@ -665,6 +736,7 @@ def main():
     logging.info(f"  Edges: {args.edges} (exists: {args.edges.exists()})")
     logging.info(f"  Shade results: {args.shade_results} (exists: {args.shade_results.exists()})")
     logging.info(f"  Workers: {args.workers} (available CPUs: {max_workers})")
+    logging.info(f"  Historical hours (raw): {args.historical_hours if args.historical_hours else 'disabled'}")
     
     if args.sanity_check:
         logging.info(f"  🔍 Sanity check mode: {args.sanity_check} batches")
@@ -674,7 +746,8 @@ def main():
         edge_file=args.edges,
         shade_results_path=args.shade_results,
         osmid=args.osmid,
-        output_dir=args.output
+        output_dir=args.output,
+        historical_hours=args.historical_hours,
     )
     
     success = extractor.run_parallel_extraction(
