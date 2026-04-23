@@ -62,7 +62,7 @@ def process_raster(config, path, osmid):
             dsm_crs = src.crs
 
         # 2. Prepare all necessary masks (buildings, trees)
-        combined_bldg_tree_mask, combined_building_mask, canopy_dsm = _prepare_masks(
+        combined_bldg_tree_mask, combined_building_mask, chm_mask = _prepare_masks(
             config, osmid, dsm_data, dsm_crs, dsm_bounds, tile_stem, dsm_meta
         )
 
@@ -72,6 +72,13 @@ def process_raster(config, path, osmid):
 
         # 4. Create the final analysis-ready DSMs
         dsm_buildings = np.where(combined_building_mask == 0, interpolated_dtm, dsm_data)
+        dtm_surface = np.where(np.isnan(interpolated_dtm), dsm_data, interpolated_dtm)
+        canopy_dsm = np.where(chm_mask, dsm_data - dtm_surface, 0)
+        canopy_dsm = np.clip(canopy_dsm, 0, None)
+        canopy_dsm = np.nan_to_num(canopy_dsm, nan=0)
+
+        assert dsm_buildings.shape == dsm_data.shape, (dsm_buildings.shape, dsm_data.shape)
+        assert canopy_dsm.shape == dsm_data.shape, (canopy_dsm.shape, dsm_data.shape)
 
         # 5. Crop and save the final output rasters
         _save_output_rasters(
@@ -140,11 +147,9 @@ def _prepare_masks(config, osmid, dsm_data, dsm_crs, dsm_bounds, tile_stem, dsm_
 
     if chm_mask_path.exists():
         chm_mask = _read_mask_on_grid(chm_mask_path, dsm_meta, dtype='uint8').astype(bool)
-        canopy_dsm = np.where(chm_mask, dsm_data, np.nan)
     else:
-        print(f"Warning: CHM mask not found at {chm_mask_path}. Canopy DSM will be empty.")
+        print(f"Warning: CHM mask not found at {chm_mask_path}. Canopy mask will be empty.")
         chm_mask = np.zeros_like(dsm_data, dtype=bool)
-        canopy_dsm = np.full_like(dsm_data, np.nan, dtype=float)
 
     # Load building mask from original solar data
     mask_path = output_dir / f"step2_solar_data/{osmid}/{tile_stem}_mask.tif"
@@ -174,8 +179,7 @@ def _prepare_masks(config, osmid, dsm_data, dsm_crs, dsm_bounds, tile_stem, dsm_
     # Combine all masks
     combined_building_mask = np.logical_or(bldg_mask, osm_bldg_mask)
     combined_bldg_tree_mask = np.logical_or(chm_mask, combined_building_mask)
-
-    return combined_bldg_tree_mask, combined_building_mask, canopy_dsm
+    return combined_bldg_tree_mask, combined_building_mask, chm_mask
 
 def _interpolate_dtm(dtm_raw, dsm_meta):
     """
